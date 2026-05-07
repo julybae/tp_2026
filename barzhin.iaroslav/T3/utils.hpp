@@ -12,19 +12,23 @@ namespace Utils {
 
     std::vector<Polygon> load_from_file(char* filename);
 
-    double cmd_AREA_EVEN_ODD(const std::vector<Polygon> &data, bool odd = false);
-    double cmd_AREA_MEAN(const std::vector<Polygon> &data);
-    double cmd_AREA_NUM(const std::vector<Polygon> &data, std::size_t num_of_vertexes);
-    double cmd_MAX_AREA(const std::vector<Polygon> &data);
-    double cmd_MIN_AREA(const std::vector<Polygon> &data);
+    double area_even_odd(const std::vector<Polygon>& data, bool odd);
+    double area_mean(const std::vector<Polygon>& data);
+    double area_num(const std::vector<Polygon>& data, std::size_t num_of_vertexes);
+    double max_area(const std::vector<Polygon>& data);
+    double min_area(const std::vector<Polygon>& data);
+    std::size_t max_vertexes(const std::vector<Polygon>& data);
+    std::size_t min_vertexes(const std::vector<Polygon>& data);
+    std::size_t count_even_odd(const std::vector<Polygon>& data, bool odd);
+    std::size_t count_num(const std::vector<Polygon>& data, std::size_t num_of_vertexes);
 
-    std::size_t cmd_MAX_VERTEXES(const std::vector<Polygon> &data);
-    std::size_t cmd_MIN_VERTEXES(const std::vector<Polygon> &data);
-    std::size_t cmd_COUNT_EVEN_ODD(const std::vector<Polygon> &data, bool odd = false);
-    std::size_t cmd_COUNT_NUM(const std::vector<Polygon> &data, std::size_t num_of_vertexes);
-
-    std::size_t cmd_ECHO_POLYGON(std::vector<Polygon> &data, const Polygon &p);
-    bool cmd_INFRAME_POLYGON(const std::vector<Polygon> &data, const Polygon &p);
+    // rewrite done
+    void cmd_MAX(const std::vector<Polygon>& data, std::istream& is, std::ostream& os);
+    void cmd_MIN(const std::vector<Polygon>& data, std::istream& is, std::ostream& os);
+    void cmd_AREA(const std::vector<Polygon>& data, std::istream& is, std::ostream& os);
+    void cmd_COUNT(const std::vector<Polygon>& data, std::istream& is, std::ostream& os);
+    void cmd_ECHO(std::vector<Polygon> &data, std::istream& is, std::ostream& os);
+    void cmd_INFRAME(std::vector<Polygon> &data, std::istream& is, std::ostream& os);
 }
 
 #endif // T3_UTILS_HPP

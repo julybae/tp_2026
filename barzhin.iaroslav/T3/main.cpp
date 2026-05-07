@@ -5,6 +5,9 @@
 #include <limits>
 #include <algorithm>
 #include <cctype>
+#include <map>
+#include <functional>
+#include <string>
 
 #include "polygon.hpp"
 #include "utils.hpp"
@@ -15,106 +18,28 @@ int main(int argc, char* argv[]) {
         return 1;
     };
 
-    auto is_unsigned_number = [](const std::string &value) {
-        return !value.empty() && std::all_of(value.begin(), value.end(), [](unsigned char c) {
-            return std::isdigit(c) != 0;
-        });
-    };
-
     auto polygons = Utils::load_from_file(argv[1]);
     Utils::setup_iomanip(std::cout);
 
+    std::map<std::string, std::function<void()>> cmds;
+
+    // using std::cref when function does not modify data
+    //   and std::ref when it does
+    // just passing polygons without std::(c)ref would show only initial data
+    //   that were taken from file and would not reflect changes made by
+    //   ECHO command
+    cmds["MAX"] = std::bind(Utils::cmd_MAX, std::cref(polygons), std::ref(std::cin), std::ref(std::cout));
+    cmds["MIN"] = std::bind(Utils::cmd_MIN, std::cref(polygons), std::ref(std::cin), std::ref(std::cout));
+    cmds["AREA"] = std::bind(Utils::cmd_AREA, std::cref(polygons), std::ref(std::cin), std::ref(std::cout));
+    cmds["COUNT"] = std::bind(Utils::cmd_COUNT, std::cref(polygons), std::ref(std::cin), std::ref(std::cout));
+    cmds["ECHO"] = std::bind(Utils::cmd_ECHO, std::ref(polygons), std::ref(std::cin), std::ref(std::cout));
+    cmds["INFRAME"] = std::bind(Utils::cmd_INFRAME, std::ref(polygons), std::ref(std::cin), std::ref(std::cout));
+
     std::string command;
-    while (std::cin >> command) {
+    while (!(std::cin >> command).eof()) {
         try {
-            if (command == "AREA") {
-                std::string sub;
-                if (!(std::cin >> sub)) {
-                    throw std::invalid_argument("");
-                }
-
-                if (sub == "EVEN") {
-                    std::cout << Utils::cmd_AREA_EVEN_ODD(polygons, false) << std::endl;
-                } else if (sub == "ODD") {
-                    std::cout << Utils::cmd_AREA_EVEN_ODD(polygons, true) << std::endl;
-                } else if (sub == "MEAN") {
-                    std::cout << Utils::cmd_AREA_MEAN(polygons) << std::endl;
-                } else if (is_unsigned_number(sub)) {
-                    std::size_t num = std::stoul(sub);
-                    if (num < 3) {
-                        throw std::invalid_argument("");
-                    }
-                    std::cout << Utils::cmd_AREA_NUM(polygons, num) << std::endl;
-                } else {
-                    throw std::invalid_argument("");
-                }
-            } else if (command == "MAX") {
-                std::string sub;
-                std::cin >> sub;
-                if (sub == "AREA") std::cout << Utils::cmd_MAX_AREA(polygons) << std::endl;
-                else if (sub == "VERTEXES") std::cout << Utils::cmd_MAX_VERTEXES(polygons) << std::endl;
-                else throw std::invalid_argument("");
-            } else if (command == "MIN") {
-                std::string sub;
-                std::cin >> sub;
-                if (sub == "AREA") std::cout << Utils::cmd_MIN_AREA(polygons) << std::endl;
-                else if (sub == "VERTEXES") std::cout << Utils::cmd_MIN_VERTEXES(polygons) << std::endl;
-                else throw std::invalid_argument("");
-            } else if (command == "COUNT") {
-                std::string sub;
-                if (!(std::cin >> sub)) {
-                    throw std::invalid_argument("");
-                }
-
-                if (sub == "EVEN") {
-                    std::cout << Utils::cmd_COUNT_EVEN_ODD(polygons, false) << std::endl;
-                } else if (sub == "ODD") {
-                    std::cout << Utils::cmd_COUNT_EVEN_ODD(polygons, true) << std::endl;
-                } else if (is_unsigned_number(sub)) {
-                    std::size_t num = std::stoul(sub);
-                    if (num < 3) {
-                        throw std::invalid_argument("");
-                    }
-                    std::cout << Utils::cmd_COUNT_NUM(polygons, num) << std::endl;
-                } else {
-                    throw std::invalid_argument("");
-                }
-            } else if (command == "ECHO") {
-                Polygon p;
-                if (!(std::cin >> p)) {
-                    std::cout << "<INVALID COMMAND>" << std::endl;
-                    std::cin.clear();
-                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    continue;
-                }
-                // ensure no extra tokens remain on the same line
-                std::string rest;
-                std::getline(std::cin, rest);
-                if (rest.find_first_not_of(" \t\r\n") != std::string::npos) {
-                    std::cout << "<INVALID COMMAND>" << std::endl;
-                    continue;
-                }
-                std::cout << Utils::cmd_ECHO_POLYGON(polygons, p) << std::endl;
-            } else if (command == "INFRAME") {
-                Polygon p;
-                if (!(std::cin >> p)) {
-                    std::cout << "<INVALID COMMAND>" << std::endl;
-                    std::cin.clear();
-                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    continue;
-                }
-                // ensure no extra tokens remain on the same line
-                std::string rest;
-                std::getline(std::cin, rest);
-                if (rest.find_first_not_of(" \t\r\n") != std::string::npos) {
-                    std::cout << "<INVALID COMMAND>" << std::endl;
-                    continue;
-                }
-                std::cout << (Utils::cmd_INFRAME_POLYGON(polygons, p) ? "<TRUE>" : "<FALSE>") << std::endl;
-            } else {
-                throw std::runtime_error("Unknown command");
-            }
-        } catch (...) {
+            cmds.at(command)();
+        } catch (std::exception &e) {
             std::cout << "<INVALID COMMAND>" << std::endl;
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
