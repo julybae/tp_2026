@@ -63,9 +63,11 @@ bool test_utils_echo() {
     Polygon p2; p2.addPoint({0,0}); p2.addPoint({2,2}); p2.addPoint({2,0});
 
     std::vector<Polygon> data = {p1, p2, p1};
-    std::size_t added = Utils::cmd_ECHO_POLYGON(data, p1);
+    std::istringstream in("3 (0;0) (1;1) (1;0)");
+    std::ostringstream out;
+    Utils::cmd_ECHO(data, in, out);
 
-    return added == 2 && data.size() == 5 && data[1] == p1 && data[4] == p1;
+    return out.str() == "2\n" && data.size() == 5 && data[1] == p1 && data[4] == p1;
 }
 
 bool test_utils_count() {
@@ -74,8 +76,8 @@ bool test_utils_count() {
 
     std::vector<Polygon> data = {tri, rect, tri};
 
-    bool count_odd = Utils::cmd_COUNT_EVEN_ODD(data, true) == 2;
-    bool count_even = Utils::cmd_COUNT_EVEN_ODD(data, false) == 1;
+    bool count_odd = Utils::count_even_odd(data, true) == 2;
+    bool count_even = Utils::count_even_odd(data, false) == 1;
 
     return count_odd && count_even;
 }
@@ -98,8 +100,15 @@ bool test_utils_inframe() {
     outer.addPoint({-1,-1}); outer.addPoint({2,-1}); outer.addPoint({2,2});
 
     std::vector<Polygon> data = {frame};
-    return Utils::cmd_INFRAME_POLYGON(data, inner) == true &&
-           Utils::cmd_INFRAME_POLYGON(data, outer) == false;
+    std::istringstream in_inner("3 (2;2) (5;2) (5;5)");
+    std::ostringstream out_inner;
+    Utils::cmd_INFRAME(data, in_inner, out_inner);
+
+    std::istringstream in_outer("3 (-1;-1) (2;-1) (2;2)");
+    std::ostringstream out_outer;
+    Utils::cmd_INFRAME(data, in_outer, out_outer);
+
+    return out_inner.str() == "<TRUE>\n" && out_outer.str() == "<FALSE>\n";
 }
 
 int main() {
