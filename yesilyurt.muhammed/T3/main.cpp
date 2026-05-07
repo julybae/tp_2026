@@ -217,7 +217,7 @@ bool pointInsidePolygon(const Polygon& poly, const Point& p)
     }
 
     bool intersect = ((a.y > p.y) != (b.y > p.y)) &&
-                     (p.x < (double)(b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x);
+                     (p.x < static_cast<double>(b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x)
 
     if (intersect)
     {
