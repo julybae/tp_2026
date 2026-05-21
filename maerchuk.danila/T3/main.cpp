@@ -10,7 +10,6 @@
 #include <iterator>
 #include <functional>
 
-// 4. Структуры данных из задания
 struct Point
 {
     int x, y;
@@ -21,14 +20,12 @@ struct Polygon
     std::vector<Point> points;
 };
 
-// --- Вспомогательные геометрические функции (реализованы через алгоритмы STL) ---
+// --- Геометрические функции ---
 
-// Вычисление площади полигона методом Гаусса (формула шнурков)
 double getArea(const Polygon& polygon)
 {
     if (polygon.points.size() < 3) return 0.0;
 
-    // Используем std::accumulate для обхода вершин без циклов
     double area = std::accumulate(
         polygon.points.begin(), polygon.points.end(), 0.0,
         [&polygon](double sum, const Point& p) {
@@ -41,20 +38,17 @@ double getArea(const Polygon& polygon)
     return std::abs(area) / 2.0;
 }
 
-// Проверка, является ли фигура прямоугольником (для команды RECTS)
 bool isRectangle(const Polygon& polygon)
 {
     if (polygon.points.size() != 4) return false;
 
     const auto& p = polygon.points;
 
-    // Вектора сторон
     auto v1x = p[1].x - p[0].x; auto v1y = p[1].y - p[0].y;
     auto v2x = p[2].x - p[1].x; auto v2y = p[2].y - p[1].y;
     auto v3x = p[3].x - p[2].x; auto v3y = p[3].y - p[2].y;
     auto v4x = p[0].x - p[3].x; auto v4y = p[0].y - p[3].y;
 
-    // Скалярные произведения смежных сторон
     auto dot1 = v1x * v2x + v1y * v2y;
     auto dot2 = v2x * v3x + v2y * v3y;
     auto dot3 = v3x * v4x + v3y * v4y;
@@ -63,7 +57,6 @@ bool isRectangle(const Polygon& polygon)
     return (dot1 == 0 && dot2 == 0 && dot3 == 0 && dot4 == 0);
 }
 
-// Вспомогательные функции для проверки пересечений (для команды INTERSECTIONS)
 bool onSegment(Point p, Point q, Point r) {
     return q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
            q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y);
@@ -89,10 +82,8 @@ bool doSegmentsIntersect(Point p1, Point q1, Point p2, Point q2) {
     return false;
 }
 
-// Проверка пересечения двух полигонов
 bool doPolygonsIntersect(const Polygon& poly1, const Polygon& poly2)
 {
-    // Проверяем пересечение любых пар отрезков полигонов
     return std::any_of(poly1.points.begin(), poly1.points.end(), [&](const Point& p1) {
         size_t i = &p1 - &poly1.points[0];
         Point q1 = poly1.points[(i + 1) % poly1.points.size()];
@@ -107,7 +98,6 @@ bool doPolygonsIntersect(const Polygon& poly1, const Polygon& poly2)
 
 // --- Парсинг данных ---
 
-// Безопасный парсинг одной точки формата (x;y)
 bool parsePoint(const std::string& s, Point& pt)
 {
     if (s.front() != '(' || s.back() != ')') return false;
@@ -123,12 +113,10 @@ bool parsePoint(const std::string& s, Point& pt)
     return true;
 }
 
-// Построчная валидация и чтение фигур
 bool parsePolygonLine(const std::string& line, Polygon& poly)
 {
     if (line.empty()) return false;
     std::string clean_line;
-    // Очищаем от возможных переносов строк внутри файла, приводя к одному пробелу
     std::unique_copy(line.begin(), line.end(), std::back_inserter(clean_line),
                      [](char a, char b) { return a == ' ' && b == ' '; });
 
@@ -153,7 +141,6 @@ bool parsePolygonLine(const std::string& line, Polygon& poly)
     return valid;
 }
 
-// Парсинг аргумента-полигона из командного ввода пользователя
 bool parsePolygonFromStream(std::istream& is, Polygon& poly)
 {
     size_t num_vertices;
@@ -176,25 +163,27 @@ void handleArea(const std::vector<Polygon>& polygons, std::istream& is)
     double total_area = 0.0;
 
     if (arg == "EVEN") {
-        total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0, [](double sum, const Polygon& p) {
-            return sum + (p.points.size() % 2 == 0 ? getArea(p) : 0.0);
-        });
+        total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [](double sum, const Polygon& p) {
+                return sum + (p.points.size() % 2 == 0 ? getArea(p) : 0.0);
+            });
     } else if (arg == "ODD") {
-        total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0, [](double sum, const Polygon& p) {
-            return sum + (p.points.size() % 2 != 0 ? getArea(p) : 0.0);
-        });
+        total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [](double sum, const Polygon& p) {
+                return sum + (p.points.size() % 2 != 0 ? getArea(p) : 0.0);
+            });
     } else if (arg == "MEAN") {
         if (polygons.empty()) { std::cout << "<INVALID COMMAND>\n"; return; }
-        double sum_area = std::accumulate(polygons.begin(), polygons.end(), 0.0, [](double sum, const Polygon& p) {
-            return sum + getArea(p);
-        });
+        double sum_area = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+            [](double sum, const Polygon& p) { return sum + getArea(p); });
         total_area = sum_area / polygons.size();
     } else {
         try {
             size_t num = std::stoull(arg);
-            total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0, [num](double sum, const Polygon& p) {
-                return sum + (p.points.size() == num ? getArea(p) : 0.0);
-            });
+            total_area = std::accumulate(polygons.begin(), polygons.end(), 0.0,
+                [num](double sum, const Polygon& p) {
+                    return sum + (p.points.size() == num ? getArea(p) : 0.0);
+                });
         } catch (...) {
             std::cout << "<INVALID COMMAND>\n";
             return;
@@ -209,14 +198,14 @@ void handleMax(const std::vector<Polygon>& polygons, std::istream& is)
     if (!(is >> arg) || polygons.empty()) { std::cout << "<INVALID COMMAND>\n"; return; }
 
     if (arg == "AREA") {
-        auto it = std::max_element(polygons.begin(), polygons.end(), [](const Polygon& a, const Polygon& b) {
-            return getArea(a) < getArea(b);
-        });
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return getArea(a) < getArea(b); });
         std::cout << std::fixed << std::setprecision(1) << getArea(*it) << "\n";
     } else if (arg == "VERTEXES") {
-        auto it = std::max_element(polygons.begin(), polygons.end(), [](const Polygon& a, const Polygon& b) {
-            return a.points.size() < b.points.size();
-        });
+        auto it = std::max_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) {
+                return a.points.size() < b.points.size();
+            });
         std::cout << it->points.size() << "\n";
     } else {
         std::cout << "<INVALID COMMAND>\n";
@@ -229,14 +218,14 @@ void handleMin(const std::vector<Polygon>& polygons, std::istream& is)
     if (!(is >> arg) || polygons.empty()) { std::cout << "<INVALID COMMAND>\n"; return; }
 
     if (arg == "AREA") {
-        auto it = std::min_element(polygons.begin(), polygons.end(), [](const Polygon& a, const Polygon& b) {
-            return getArea(a) < getArea(b);
-        });
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) { return getArea(a) < getArea(b); });
         std::cout << std::fixed << std::setprecision(1) << getArea(*it) << "\n";
     } else if (arg == "VERTEXES") {
-        auto it = std::min_element(polygons.begin(), polygons.end(), [](const Polygon& a, const Polygon& b) {
-            return a.points.size() < b.points.size();
-        });
+        auto it = std::min_element(polygons.begin(), polygons.end(),
+            [](const Polygon& a, const Polygon& b) {
+                return a.points.size() < b.points.size();
+            });
         std::cout << it->points.size() << "\n";
     } else {
         std::cout << "<INVALID COMMAND>\n";
@@ -250,13 +239,16 @@ void handleCount(const std::vector<Polygon>& polygons, std::istream& is)
 
     long long count = 0;
     if (arg == "EVEN") {
-        count = std::count_if(polygons.begin(), polygons.end(), [](const Polygon& p) { return p.points.size() % 2 == 0; });
+        count = std::count_if(polygons.begin(), polygons.end(),
+            [](const Polygon& p) { return p.points.size() % 2 == 0; });
     } else if (arg == "ODD") {
-        count = std::count_if(polygons.begin(), polygons.end(), [](const Polygon& p) { return p.points.size() % 2 != 0; });
+        count = std::count_if(polygons.begin(), polygons.end(),
+            [](const Polygon& p) { return p.points.size() % 2 != 0; });
     } else {
         try {
             size_t num = std::stoull(arg);
-            count = std::count_if(polygons.begin(), polygons.end(), [num](const Polygon& p) { return p.points.size() == num; });
+            count = std::count_if(polygons.begin(), polygons.end(),
+                [num](const Polygon& p) { return p.points.size() == num; });
         } catch (...) {
             std::cout << "<INVALID COMMAND>\n";
             return;
@@ -265,16 +257,14 @@ void handleCount(const std::vector<Polygon>& polygons, std::istream& is)
     std::cout << count << "\n";
 }
 
-// --- Обработчики вариативных команд (Вариант 15) ---
+// --- Вариант 15 ---
 
-// RECTS: Подсчёт количества прямоугольников в коллекции
 void handleRects(const std::vector<Polygon>& polygons)
 {
     long long count = std::count_if(polygons.begin(), polygons.end(), isRectangle);
     std::cout << count << "\n";
 }
 
-// INTERSECTIONS: Подсчёт количества фигур, пересекающихся с переданным полигоном
 void handleIntersections(const std::vector<Polygon>& polygons, std::istream& is)
 {
     Polygon target;
@@ -283,9 +273,8 @@ void handleIntersections(const std::vector<Polygon>& polygons, std::istream& is)
         return;
     }
 
-    long long count = std::count_if(polygons.begin(), polygons.end(), [&](const Polygon& p) {
-        return doPolygonsIntersect(p, target);
-    });
+    long long count = std::count_if(polygons.begin(), polygons.end(),
+        [&](const Polygon& p) { return doPolygonsIntersect(p, target); });
     std::cout << count << "\n";
 }
 
@@ -293,7 +282,6 @@ void handleIntersections(const std::vector<Polygon>& polygons, std::istream& is)
 
 int main(int argc, char* argv[])
 {
-    // 2. Проверка аргументов командной строки
     if (argc < 2) {
         std::cerr << "Error: File name is not provided.\n";
         return 1;
@@ -308,16 +296,14 @@ int main(int argc, char* argv[])
     std::vector<Polygon> polygons;
     std::string line;
 
-    // 1. Считывание геометрических фигур отдельно от обработки команд
     while (std::getline(infile, line)) {
         Polygon poly;
         if (parsePolygonLine(line, poly)) {
             polygons.push_back(poly);
-        } // Некорректные строки согласно ТЗ игнорируются
+        }
     }
     infile.close();
 
-    // 2. Обработка пользовательского ввода команд из std::cin до EOF
     std::string command;
     while (std::cin >> command) {
         if (command == "AREA") {
@@ -334,7 +320,6 @@ int main(int argc, char* argv[])
             handleIntersections(polygons, std::cin);
         } else {
             std::cout << "<INVALID COMMAND>\n";
-            // Очищаем некорректную строку до конца, чтобы продолжить чтение
             std::string dummy;
             std::getline(std::cin, dummy);
         }
