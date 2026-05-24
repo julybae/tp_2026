@@ -4,6 +4,7 @@
 #include <cctype>
 #include <iomanip>
 #include <cmath>
+#include <sstream>
 
 namespace nspace {
     std::istream &operator>>(std::istream &in, DelimiterIO &&dest) {
@@ -136,9 +137,17 @@ namespace nspace {
             return out;
         }
         iofmtguard guard(out);
-
+        std::stringstream ss;
+        ss << std::scientific << std::setprecision(1) << src.key1;
+        std::string num_str = ss.str();
+        std::size_t e_pos = num_str.find_first_of("eE");
+        if (e_pos != std::string::npos && e_pos + 2 < num_str.size()) {
+            if (num_str[e_pos + 2] == '0' && e_pos + 3 < num_str.size()) {
+                num_str.erase(e_pos + 2, 1);
+            }
+        }
         out << "(:";
-        out << "key1 " << std::scientific << std::setprecision(1) << src.key1 << ':';
+        out << "key1 " << num_str << ':';
         out << "key2 '" << src.key2 << "':";
         out << "key3 \"" << src.key3 << "\":)";
         return out;
