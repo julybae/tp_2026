@@ -3,14 +3,13 @@
 
 #include <iostream>
 #include <string>
-#include <utility>
 
 namespace kabishev {
 
     struct DataStruct {
-        std::pair<long long, unsigned long long> key1; // RAT LSP (:N 1:D 2:)
-        unsigned long long key2;                       // ULL HEX 0xFA
-        std::string key3;                              // String "Data"
+        char key1;
+        unsigned long long key2; // Изменили тип с pair на unsigned long long
+        std::string key3;
     };
 
     std::istream& operator>>(std::istream& in, DataStruct& input);
