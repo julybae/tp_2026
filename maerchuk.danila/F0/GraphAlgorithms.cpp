@@ -45,7 +45,8 @@ ShortestPathResult GraphAlgorithms::dijkstra(const DirectedWeightedGraph& graph,
     for (const auto& u : vertices) {
         for (const auto& edge : graph.getNeighbors(u)) {
             if (edge.weight < 0.0) {
-                throw NegativeWeightException("Dijkstra cannot process negative weights. Found edge to " + edge.target_id + " with weight " + std::to_string(edge.weight));
+                throw NegativeWeightException("Dijkstra cannot process negative weights. Found edge to "
+                               + edge.target_id + " with weight " + std::to_string(edge.weight));
             }
         }
     }
