@@ -1,7 +1,6 @@
 #ifndef GRAPH_ALGORITHMS_HPP
 #define GRAPH_ALGORITHMS_HPP
 
-#pragma once
 #include "Graph.hpp"
 #include <map>
 #include <string>

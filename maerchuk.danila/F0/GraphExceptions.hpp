@@ -1,7 +1,6 @@
 #ifndef GRAPH_EXCEPTIONS_HPP
 #define GRAPH_EXCEPTIONS_HPP
 
-#pragma once
 #include <stdexcept>
 #include <string>
 

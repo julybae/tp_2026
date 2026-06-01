@@ -1,7 +1,6 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
-#pragma once
 #include <vector>
 #include <map>
 #include <string>
