@@ -124,6 +124,6 @@ Frame getCollectionFrame(const std::vector<Polygon> &polygons)
 bool isPolygonInFrame(const Polygon &poly, const Frame &frame)
 {
   return std::all_of(poly.points.begin(), poly.points.end(), [&frame](const Point &p)
-                    { return p.x >= frame.minPoint.x && p.x <= frame.maxPoint.x &&
+                     { return p.x >= frame.minPoint.x && p.x <= frame.maxPoint.x &&
                               p.y >= frame.minPoint.y && p.y <= frame.maxPoint.y; });
 }
