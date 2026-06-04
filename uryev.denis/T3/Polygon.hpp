@@ -5,11 +5,13 @@
 #include <vector>
 #include <string>
 
-struct Point {
+struct Point
+{
 	int x, y;
 };
 
-struct Polygon {
+struct Polygon
+{
 	std::vector<Point> points;
 };
 std::istream& operator>>(std::istream& in, Point& dest);
@@ -19,7 +21,8 @@ double getArea(const Polygon& poly);
 bool isPointsEqual(const Point& a, const Point& b);
 bool isPolygonEqual(const Polygon& a, const Polygon& b);
 
-struct Frame {
+struct Frame
+{
 	Point minPoint;
 	Point maxPoint;
 };
