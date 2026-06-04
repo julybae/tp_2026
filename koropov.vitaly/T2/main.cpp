@@ -2,23 +2,26 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 int main()
 {
   std::vector<DataStruct> data;
+  std::string line;
 
-  while (!std::cin.eof())
+  while (std::getline(std::cin, line))
   {
-    std::copy(
-        std::istream_iterator<DataStruct>(std::cin),
-        std::istream_iterator<DataStruct>(),
-        std::back_inserter(data));
-
-    if (std::cin.fail() && !std::cin.eof())
+    if (line.empty())
     {
-      std::cin.clear();
-      std::string ignore;
-      std::getline(std::cin, ignore);
+      continue;
+    }
+
+    std::stringstream ss(line);
+    DataStruct temp;
+
+    if (ss >> temp)
+    {
+      data.push_back(temp);
     }
   }
 
