@@ -139,6 +139,7 @@ void handlePerms(const std::vector<Polygon>& dataset, std::istream& is) {
     }
 
     long long count = std::count_if(dataset.begin(), dataset.end(), std::bind(isPermutation, std::placeholders::_1, targetPoly));
+    std::cout << count << "\n";
 }
 
 void handleRightShapes(const std::vector<Polygon>& dataset) {
