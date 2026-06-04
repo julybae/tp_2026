@@ -14,25 +14,11 @@ void printInfo(const Shape &shape) {
 
 int main() {
   std::vector<Shape *> shapes;
-  bool scaleCompleted = false;
 
   try {
-    // Создание Квадрата
-    double x = 1, y = 1, side = 2;
-    Shape *square = new Square(Point(x, y), side);
+    // Тест 1: Квадрат
+    Shape *square = new Square(Point(1, 1), 2);
     shapes.push_back(square);
-
-    // Создание Круга
-    double circleX = 3, circleY = 3, radius = 1.5;
-    Shape *circle = new Circle(Point(circleX, circleY), radius);
-    shapes.push_back(circle);
-
-    // Создание составной фигуры (CompositeShape)
-    CompositeShape composite(2);
-    composite.addShape(square->clone());
-    composite.addShape(circle->clone());
-    shapes.push_back(&composite);
-
     std::cout << "=== Test 1: Square ===" << std::endl;
     printInfo(*square);
     square->move(Point(4, 4));
@@ -42,6 +28,9 @@ int main() {
     square->scale(1.5);
     printInfo(*square);
 
+    // Тест 2: Круг
+    Shape *circle = new Circle(Point(3, 3), 1.5);
+    shapes.push_back(circle);
     std::cout << "\n=== Test 2: Circle ===" << std::endl;
     printInfo(*circle);
     circle->move(Point(5, 1));
@@ -51,38 +40,37 @@ int main() {
     circle->scale(0.8);
     printInfo(*circle);
 
+    // Тест 3: Составная фигура
+    // Используем new, чтобы избежать Segmentation Fault при удалении из вектора
+    CompositeShape *composite = new CompositeShape(2);
+    composite->addShape(square->clone());
+    composite->addShape(circle->clone());
+    shapes.push_back(composite);
+
     std::cout << "\n=== Test 3: Composite Shape ===" << std::endl;
-    printInfo(composite);
-    composite.move(Point(6, 6));
-    printInfo(composite);
-    composite.move(-1, -1);
-    printInfo(composite);
-    composite.scale(2);
-    printInfo(composite);
+    printInfo(*composite);
+    composite->move(Point(6, 6));
+    printInfo(*composite);
+    composite->move(Point(-1, -1));
+    printInfo(*composite);
+    composite->scale(2.0);
+    printInfo(*composite);
 
-    // Масштабирование всех фигур
-    double scaleFactor = 1.5;
+    // Масштабирование всего вектора
+    std::cout << "\nAfter final global scaling:" << std::endl;
     for (auto shape : shapes) {
-      shape->scale(scaleFactor);
-    }
-    scaleCompleted = true;
-
-    std::cout << "\nAfter scaling all shapes:" << std::endl;
-    for (auto shape : shapes) {
+      shape->scale(1.5);
       printInfo(*shape);
     }
 
   } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    if (!scaleCompleted) {
-      std::cerr << "Scale wasn't completed" << std::endl;
-    }
+    std::cerr << "Error: " << e.what() << std::endl;
   }
 
+  // Безопасная очистка всей памяти
   for (auto shape : shapes) {
-    if (shape && shape->getName() != "COMPOSITE_SHAPE") {
-      delete shape;
-    }
+    delete shape;
   }
+  
   return 0;
 }

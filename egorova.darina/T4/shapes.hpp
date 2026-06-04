@@ -1,27 +1,23 @@
-#pragma once
+#ifndef SHAPES_HPP
+#define SHAPES_HPP
+
 #include <string>
 
-// Класс точки
 class Point {
 public:
-    double x;
-    double y;
+    double x, y;
     Point(double x_val = 0.0, double y_val = 0.0);
 };
 
-// Класс, описывающий обрамляющий прямоугольник
 class FrameRectangle {
 public:
-    double width;
-    double height;
+    double width, height;
     Point center;
-
     FrameRectangle(double w = 0.0, double h = 0.0, Point c = Point());
     Point getBottomLeft() const;
     Point getTopRight() const;
 };
 
-// Абстрактный базовый класс фигуры
 class Shape {
 public:
     virtual ~Shape() {}
@@ -34,13 +30,10 @@ public:
     virtual std::string getName() const = 0;
 };
 
-// Класс прямоугольника
 class Rectangle : public Shape {
 private:
     Point center;
-    double width;
-    double height;
-
+    double width, height;
 public:
     Rectangle(const Point &c, double w, double h);
     double area() const override;
@@ -52,13 +45,10 @@ public:
     std::string getName() const override;
 };
 
-// Класс кольца
 class Ring : public Shape {
 private:
     Point center;
-    double innerRadius;
-    double outerRadius;
-
+    double innerRadius, outerRadius;
 public:
     Ring(const Point &c, double inner_r, double outer_r);
     double area() const override;
@@ -70,12 +60,10 @@ public:
     std::string getName() const override;
 };
 
-// Класс квадрата
 class Square : public Shape {
 private:
     Point center;
     double side;
-
 public:
     Square(const Point &c, double side_length);
     double area() const override;
@@ -87,12 +75,10 @@ public:
     std::string getName() const override;
 };
 
-// Класс круга
 class Circle : public Shape {
 private:
     Point center;
     double radius;
-
 public:
     Circle(const Point &c, double r);
     double area() const override;
@@ -104,15 +90,12 @@ public:
     std::string getName() const override;
 };
 
-// Класс составной фигуры
 class CompositeShape : public Shape {
 private:
     Shape **shapes;
-    size_t count;
-    size_t maxShapes;
+    size_t count, maxShapes;
     Point center;
     void updateCenter();
-
 public:
     CompositeShape(size_t max_s);
     ~CompositeShape();
@@ -125,3 +108,5 @@ public:
     Shape *clone() const override;
     std::string getName() const override;
 };
+
+#endif
