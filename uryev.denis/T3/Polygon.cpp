@@ -27,7 +27,6 @@ std::istream& operator>>(std::istream& in, Polygon& dest) {
     }
     std::vector<Point> tempPoints;
     tempPoints.reserve(numPoints);
-    // Считываем ровно numPoints вершин
     std::transform(
         std::istream_iterator<Point>(in),
         std::istream_iterator<Point>(),
@@ -36,7 +35,7 @@ std::istream& operator>>(std::istream& in, Polygon& dest) {
     );
     if (tempPoints.size() == numPoints) {
         dest.points = std::move(tempPoints);
-        in.clear(); // Сбрасываем failbit, вызванный istream_iterator в конце строки
+        in.clear();
     }
     else {
         in.setstate(std::ios::failbit);
@@ -45,12 +44,13 @@ std::istream& operator>>(std::istream& in, Polygon& dest) {
 }
 double getArea(const Polygon& poly) {
     if (poly.points.size() < 3) return 0.0;
-    // Вычисление площади многоугольника формулой Гаусса (шнурования) через std::accumulate
     auto indices = std::vector<size_t>(poly.points.size());
     std::iota(indices.begin(), indices.end(), 0);
-    double sum = std::accumulate(indices.begin(), indices.end(), 0.0, [&](double acc, size_t i) {
-        size_t next = (i + 1) % poly.points.size();
-        return acc + (poly.points[i].x * poly.points[next].y) - (poly.points[next].x * poly.points[i].y);
+    double sum = std::accumulate(indices.begin(),
+        indices.end(), 0.0, [&](double acc, size_t i) {
+            size_t next = (i + 1) % poly.points.size();
+            return acc + (poly.points[i].x * poly.points[next].y) -
+                (poly.points[next].x * poly.points[i].y);
         });
     return std::abs(sum) / 2.0;
 }
@@ -59,17 +59,16 @@ bool isPointsEqual(const Point& a, const Point& b) {
 }
 bool isPolygonEqual(const Polygon& a, const Polygon& b) {
     if (a.points.size() != b.points.size()) return false;
-    return std::equal(a.points.begin(), a.points.end(), b.points.begin(), isPointsEqual);
+    return std::equal(a.points.begin(),
+        a.points.end(), b.points.begin(), isPointsEqual);
 }
 Frame getCollectionFrame(const std::vector<Polygon>& polygons) {
     Frame f{ {0, 0}, {0, 0} };
     if (polygons.empty()) return f;
-    // Инициализируем рамку первыми значениями первой фигуры
     f.minPoint.x = polygons[0].points[0].x;
     f.minPoint.y = polygons[0].points[0].y;
     f.maxPoint.x = polygons[0].points[0].x;
     f.maxPoint.y = polygons[0].points[0].y;
-    // Находим экстремумы по всей коллекции без циклов
     std::for_each(polygons.begin(), polygons.end(), [&f](const Polygon& poly) {
         std::for_each(poly.points.begin(), poly.points.end(), [&f](const Point& p) {
             f.minPoint.x = std::min(f.minPoint.x, p.x);
