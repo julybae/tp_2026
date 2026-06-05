@@ -4,7 +4,6 @@
 
 std::istream& operator>>(std::istream& is, DataStruct& ds) {
     char ch;
-    // ���� ������ �������� ������ "(:", ��������� ����� ����� �� ��
     while (is.get(ch)) {
         if (ch == '(') {
             char next_ch;
@@ -73,12 +72,11 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
                         }
                     }
 
-                    // ���� ������ ���������� ��������� � �������� ��� 3 �����, ���������� �����
+
                     if (valid && has_key1 && has_key2 && has_key3) {
                         return is;
                     }
-                    // ���� ������ ���������, ���� �����������, ��� ��������� "(:", 
-                    // ��� ��������� ������������ ��������� ������ ��� ������� std::cin
+
                 }
             }
         }
@@ -88,7 +86,6 @@ std::istream& operator>>(std::istream& is, DataStruct& ds) {
 }
 
 std::ostream& operator<<(std::ostream& os, const DataStruct& ds) {
-    // 0x ��������� ������� � ������ ��������, � std::uppercase ������ ����� A-F ����������
     os << "(:key1 '" << ds.key1 << "':key2 0x"
         << std::hex << std::uppercase << ds.key2 << std::nouppercase << std::dec
         << ":key3 \"" << ds.key3 << "\":)";

@@ -110,7 +110,8 @@ inline std::istream& operator>>(std::istream& in, DataStruct& data) {
 }
 
 inline std::ostream& operator<<(std::ostream& out, const DataStruct& data) {
-    out << "(:key1 '" << data.key1 << "':key2 0x" << std::hex << std::uppercase << data.key2 << std::dec << std::nouppercase << ":key3 \"" << data.key3 << "\":)";
+    out << "(:key1 '" << data.key1 << "':key2 0x" << std::hex << std::uppercase
+    << data.key2 << std::dec << std::nouppercase << ":key3 \"" << data.key3 << "\":)";
     return out;
 }
 
