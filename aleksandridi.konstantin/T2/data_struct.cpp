@@ -66,14 +66,7 @@ namespace nspace {
         if (!sentry) {
             return in;
         }
-        char open_quote = 0, value = 0, close_quote = 0;
-        in >> open_quote >> value >> close_quote;
-        if (in && (open_quote != '\'' || close_quote != '\'')) {
-            in.setstate(std::ios::failbit);
-        } else {
-            dest.ref = value;
-        }
-        return in;
+        return in >> DelimiterIO{'\''} >> dest.ref >> DelimiterIO{'\''};
     }
 
     std::istream &operator>>(std::istream &in, StringIO &&dest) {
@@ -96,13 +89,10 @@ namespace nspace {
         in >> DelimiterIO{'('};
 
         for (int i = 0; i < 3; ++i) {
-            in >> DelimiterIO{':'};
+            char num = 0;
+            in >> DelimiterIO{':'} >> DelimiterIO{'k'} >> DelimiterIO{'e'} >> DelimiterIO{'y'} >> num;
 
-            char k = 0, e = 0, y = 0, num = 0;
-            in >> k >> e >> y >> num;
-
-            if (!in || k != 'k' || e != 'e' || y != 'y') {
-                in.setstate(std::ios::failbit);
+            if (!in) {
                 return in;
             }
 
