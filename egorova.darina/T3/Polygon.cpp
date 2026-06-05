@@ -1,0 +1,32 @@
+#include "Polygon.h"
+#include <algorithm>
+#include <iterator>
+
+bool operator==(const Point& a, const Point& b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+bool operator==(const Polygon& a, const Polygon& b) {
+    if (a.points.size() != b.points.size()) return false;
+    return std::equal(a.points.begin(), a.points.end(), b.points.begin());
+}
+
+std::istream& operator>>(std::istream& in, Point& p) {
+    char c1, c2, c3;
+    if (!(in >> c1 >> p.x >> c2 >> p.y >> c3) || c1 != '(' || c2 != ';' || c3 != ')') {
+        in.setstate(std::ios::failbit);
+    }
+    return in;
+}
+
+std::istream& operator>>(std::istream& in, Polygon& p) {
+    size_t count;
+    if (!(in >> count)) return in;
+    p.points.clear();
+    for (size_t i = 0; i < count; ++i) {
+        Point pt;
+        if (in >> pt) p.points.push_back(pt);
+    }
+    if (p.points.size() != count) in.setstate(std::ios::failbit);
+    return in;
+}
