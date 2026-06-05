@@ -32,14 +32,14 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
 
     DataStruct input;
     if (!(in >> DelimiterIO{'('})) return in;
-    
+
     bool k1 = false, k2 = false, k3 = false;
     for (int i = 0; i < 3; ++i) {
         if (!(in >> DelimiterIO{':'})) return in;
         std::string key;
         char k, e, y, n;
         if (!(in >> k >> e >> y >> n)) return in;
-        
+
         if (n == '1') {
             double re, im;
             if (!(in >> LabelIO{"#c("} >> re >> im >> DelimiterIO{')'})) return in;
@@ -56,9 +56,9 @@ std::istream& operator>>(std::istream& in, DataStruct& dest) {
             k3 = true;
         }
     }
-    
+
     if (!(in >> DelimiterIO{':'} >> DelimiterIO{')'})) return in;
-    
+
     if (in && k1 && k2 && k3) {
         dest = input;
     }
