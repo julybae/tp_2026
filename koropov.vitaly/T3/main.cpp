@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <iomanip>
+#include <cctype>
 #include "polygon.hpp"
 
 int main(int argc, char *argv[])
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     std::cerr << "Error: cannot open file " << argv[1] << "\n";
     return 1;
   }
+
   std::vector<Polygon> polygons;
   std::string file_line;
   while (std::getline(file, file_line))
@@ -36,6 +38,7 @@ int main(int argc, char *argv[])
     }
   }
   file.close();
+
   std::cout << std::fixed << std::setprecision(1);
 
   std::string command_line;
@@ -93,9 +96,20 @@ int main(int argc, char *argv[])
       }
       else
       {
+        if (arg.empty() || !std::all_of(arg.begin(), arg.end(), [](unsigned char c)
+                                        { return std::isdigit(c); }))
+        {
+          std::cout << "<INVALID COMMAND>\n";
+          continue;
+        }
         try
         {
           size_t num = std::stoull(arg);
+          if (num < 3)
+          {
+            std::cout << "<INVALID COMMAND>\n";
+            continue;
+          }
           double sum = std::accumulate(polygons.begin(), polygons.end(), 0.0, [num](double s, const Polygon &p)
                                        { return p.points.size() == num ? s + getArea(p) : s; });
           std::cout << sum << "\n";
@@ -199,9 +213,20 @@ int main(int argc, char *argv[])
       }
       else
       {
+        if (arg.empty() || !std::all_of(arg.begin(), arg.end(), [](unsigned char c)
+                                        { return std::isdigit(c); }))
+        {
+          std::cout << "<INVALID COMMAND>\n";
+          continue;
+        }
         try
         {
           size_t num = std::stoull(arg);
+          if (num < 3)
+          {
+            std::cout << "<INVALID COMMAND>\n";
+            continue;
+          }
           auto count = std::count_if(polygons.begin(), polygons.end(), [num](const Polygon &p)
                                      { return p.points.size() == num; });
           std::cout << count << "\n";
