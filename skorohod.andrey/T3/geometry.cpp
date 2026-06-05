@@ -25,7 +25,7 @@ bool Polygon::operator==(const Polygon& other) const
     return std::equal(points.begin(), points.end(), other.points.begin());
 }
 
-bool Polygon::hasRightAngle()
+bool Polygon::hasRightAngle() const
 {
     size_t n = vertexCount();
     if (n < 3) return false;
