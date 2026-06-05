@@ -175,11 +175,12 @@ void handleEcho(std::vector<Polygon> &polygons, std::istream &is)
 {
   Polygon target;
   if (!(is >> target)) {
+    std::cout << "<INVALID COMMAND>\n";
     is.clear();
     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "<INVALID COMMAND>\n";
     return;
   }
+
   std::vector<Polygon> updatedCollection;
   updatedCollection.reserve(polygons.size() * 2);
   size_t addedCount = 0;
@@ -198,12 +199,13 @@ void handleEcho(std::vector<Polygon> &polygons, std::istream &is)
 void handleInFrame(const std::vector<Polygon> &polygons, std::istream &is)
 {
   Polygon target;
-  if (!(is >> target)) {
+  if (!(is >> target) || polygons.empty()) {
+    std::cout << "<INVALID COMMAND>\n";
     is.clear();
     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "<INVALID COMMAND>\n";
     return;
   }
+
 
   Frame currentFrame = getCollectionFrame(polygons);
   if (isPolygonInFrame(target, currentFrame))
@@ -273,11 +275,10 @@ int main(int argc, char *argv[])
     {
       handleInFrame(polygons, std::cin);
     }
-    else
-    {
+    else {
       std::cout << "<INVALID COMMAND>\n";
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
   }
 
