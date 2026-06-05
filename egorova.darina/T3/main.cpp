@@ -18,19 +18,19 @@ int main(int argc, char* argv[]) {
         if (line.empty()) continue;
         std::stringstream ss(line);
         Polygon poly;
-        if (ss >> poly) figures.push_back(poly);
+        if (ss >> poly && ss.eof()) figures.push_back(poly);
     }
 
     std::string cmd;
     while (std::cin >> cmd) {
         try {
             if (cmd == "AREA") cmdArea(figures);
+            else if (cmd == "MAX") cmdMax(figures);
+            else if (cmd == "MIN") cmdMin(figures);
+            else if (cmd == "COUNT") cmdCount(figures);
             else if (cmd == "INTERSECTIONS") cmdIntersections(figures);
             else if (cmd == "RMECHO") cmdRmEcho(figures);
-            else {
-                std::cout << "<INVALID COMMAND>\n";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
+            else throw std::runtime_error("");
         } catch (...) {
             std::cout << "<INVALID COMMAND>\n";
             std::cin.clear();

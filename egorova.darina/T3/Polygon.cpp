@@ -1,6 +1,6 @@
 #include "Polygon.h"
 #include <algorithm>
-#include <iterator>
+#include <limits>
 
 bool operator==(const Point& a, const Point& b) {
     return a.x == b.x && a.y == b.y;
@@ -12,21 +12,36 @@ bool operator==(const Polygon& a, const Polygon& b) {
 }
 
 std::istream& operator>>(std::istream& in, Point& p) {
-    char c1, c2, c3;
-    if (!(in >> c1 >> p.x >> c2 >> p.y >> c3) || c1 != '(' || c2 != ';' || c3 != ')') {
+    std::istream::sentry sentry(in);
+    if (!sentry) return in;
+    char c1 = 0, c2 = 0, c3 = 0;
+    int x = 0, y = 0;
+    if (!(in >> c1 >> x >> c2 >> y >> c3) || c1 != '(' || c2 != ';' || c3 != ')') {
         in.setstate(std::ios::failbit);
+    } else {
+        p.x = x;
+        p.y = y;
     }
     return in;
 }
 
 std::istream& operator>>(std::istream& in, Polygon& p) {
-    size_t count;
-    if (!(in >> count)) return in;
-    p.points.clear();
+    std::istream::sentry sentry(in);
+    if (!sentry) return in;
+    size_t count = 0;
+    if (!(in >> count) || count < 3) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    std::vector<Point> temp;
     for (size_t i = 0; i < count; ++i) {
         Point pt;
-        if (in >> pt) p.points.push_back(pt);
+        if (!(in >> pt)) {
+            in.setstate(std::ios::failbit);
+            return in;
+        }
+        temp.push_back(pt);
     }
-    if (p.points.size() != count) in.setstate(std::ios::failbit);
+    p.points = std::move(temp);
     return in;
 }

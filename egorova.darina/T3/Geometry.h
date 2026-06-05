@@ -5,5 +5,6 @@
 
 double getArea(const Polygon& p);
 bool polygonsIntersect(const Polygon& p1, const Polygon& p2);
+bool isPointInPolygon(Point p, const Polygon& poly);
 
 #endif

@@ -5,9 +5,7 @@
 double getArea(const Polygon& p) {
     double area = 0.0;
     size_t n = p.points.size();
-    if (n < 3) return 0.0;
     for (size_t i = 0; i < n; ++i) {
-        // Вычисляем площадь без использования C-style cast
         area += (static_cast<double>(p.points[i].x) * p.points[(i + 1) % n].y -
                  static_cast<double>(p.points[(i + 1) % n].x) * p.points[i].y);
     }
@@ -18,19 +16,13 @@ struct Segment { Point a, b; };
 
 bool segmentsIntersect(Segment s1, Segment s2) {
     auto cross_product = [](Point a, Point b, Point c) {
-        // Заменяем (long long) на static_cast<long long>
-        long long dx1 = static_cast<long long>(b.x) - a.x;
-        long long dy1 = static_cast<long long>(c.y) - a.y;
-        long long dy2 = static_cast<long long>(b.y) - a.y;
-        long long dx2 = static_cast<long long>(c.x) - a.x;
-        return dx1 * dy1 - dy2 * dx2;
+        return static_cast<long long>(b.x - a.x) * (c.y - a.y) -
+               static_cast<long long>(b.y - a.y) * (c.x - a.x);
     };
-
     auto on_segment = [](Point p, Segment s) {
         return p.x <= std::max(s.a.x, s.b.x) && p.x >= std::min(s.a.x, s.b.x) &&
                p.y <= std::max(s.a.y, s.b.y) && p.y >= std::min(s.a.y, s.b.y);
     };
-
     long long d1 = cross_product(s2.a, s2.b, s1.a);
     long long d2 = cross_product(s2.a, s2.b, s1.b);
     long long d3 = cross_product(s1.a, s1.b, s2.a);
@@ -38,16 +30,28 @@ bool segmentsIntersect(Segment s1, Segment s2) {
 
     if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
         ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
-
     if (d1 == 0 && on_segment(s1.a, s2)) return true;
     if (d2 == 0 && on_segment(s1.b, s2)) return true;
     if (d3 == 0 && on_segment(s2.a, s1)) return true;
     if (d4 == 0 && on_segment(s2.b, s1)) return true;
-
     return false;
 }
 
+bool isPointInPolygon(Point pt, const Polygon& poly) {
+    bool result = false;
+    size_t n = poly.points.size();
+    for (size_t i = 0, j = n - 1; i < n; j = i++) {
+        if (((poly.points[i].y > pt.y) != (poly.points[j].y > pt.y)) &&
+            (pt.x < (poly.points[j].x - poly.points[i].x) * (pt.y - poly.points[i].y) /
+            static_cast<double>(poly.points[j].y - poly.points[i].y) + poly.points[i].x)) {
+            result = !result;
+        }
+    }
+    return result;
+}
+
 bool polygonsIntersect(const Polygon& p1, const Polygon& p2) {
+    // 1. Пересечение границ
     for (size_t i = 0; i < p1.points.size(); ++i) {
         Segment s1 = {p1.points[i], p1.points[(i + 1) % p1.points.size()]};
         for (size_t j = 0; j < p2.points.size(); ++j) {
@@ -55,5 +59,7 @@ bool polygonsIntersect(const Polygon& p1, const Polygon& p2) {
             if (segmentsIntersect(s1, s2)) return true;
         }
     }
+    // 2. Один внутри другого
+    if (isPointInPolygon(p1.points[0], p2) || isPointInPolygon(p2.points[0], p1)) return true;
     return false;
 }
