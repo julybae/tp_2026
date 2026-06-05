@@ -51,7 +51,7 @@ bool isPointInsidePolygon(Point p, const Polygon &poly)
         Point next = poly.points[(i + 1) % n];
 
         if (((current.y > p.y) != (next.y > p.y)) &&
-            (p.x < (next.x - current.x) * (p.y - current.y) / (double)(next.y - current.y) + current.x)) {
+            (p.x < (next.x - current.x) * (p.y - current.y) / static_cast<double>(next.y - current.y) + current.x)) {
             inside = !inside;
         } });
 
