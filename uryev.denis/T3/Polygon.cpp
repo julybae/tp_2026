@@ -27,7 +27,7 @@ std::istream &operator>>(std::istream &in, Point &dest)
   return in;
 }
 
-std::istream &operator>>(std::istream &in, Polygon &dest)
+std::istream& operator>>(std::istream& in, Polygon& dest)
 {
   std::istream::sentry sentry(in);
   if (!sentry)
@@ -56,13 +56,6 @@ std::istream &operator>>(std::istream &in, Polygon &dest)
       return in;
     }
   }
-  char extra = 0;
-  if (in >> extra)
-  {
-    in.setstate(std::ios::failbit);
-    return in;
-  }
-
   dest.points = std::move(tempPoints);
   return in;
 }
