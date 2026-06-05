@@ -4,6 +4,7 @@
 #include <vector>
 #include "polygon.hpp"
 #include "commands.hpp"
+#include <algorithm>
 
 int main(int argc, char *argv[])
 {
@@ -25,13 +26,20 @@ int main(int argc, char *argv[])
 
   while (std::getline(file, line))
   {
-    if (line.empty())
+    // Пропускаем пустые строки или строки только с пробелами
+    if (line.empty() || std::all_of(line.begin(), line.end(), ::isspace))
+    {
       continue;
+    }
+
     std::stringstream ss(line);
     Polygon poly;
+
+    // Попытка распарсить полигон из строки
     if (ss >> poly)
     {
       std::string trailing;
+      // Условие: если после чтения N точек в строке остался какой-то мусор/лишние точки
       if (!(ss >> trailing))
       {
         shapes.push_back(poly);

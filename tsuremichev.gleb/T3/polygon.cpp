@@ -13,25 +13,55 @@ bool operator==(const Polygon &a, const Polygon &b)
   return std::equal(a.points.begin(), a.points.end(), b.points.begin());
 }
 
+// Потоковое чтение одной точки
 std::istream &operator>>(std::istream &in, Point &p)
 {
-  char c1, c2, c3;
-  if (in >> c1 >> p.x >> c2 >> p.y >> c3)
+  char c1 = 0, c2 = 0, c3 = 0;
+
+  if (!(in >> c1) || c1 != '(')
   {
-    if (c1 != '(' || c2 != ';' || c3 != ')')
-    {
-      in.setstate(std::ios::failbit);
-    }
+    in.setstate(std::ios::failbit);
+    return in;
   }
+  if (!(in >> p.x))
+  {
+    return in;
+  }
+  if (!(in >> c2) || c2 != ';')
+  {
+    in.setstate(std::ios::failbit);
+    return in;
+  }
+  if (!(in >> p.y))
+  {
+    return in;
+  }
+  if (!(in >> c3) || c3 != ')')
+  {
+    in.setstate(std::ios::failbit);
+    return in;
+  }
+
   return in;
 }
 
+// Потоковое чтение полигона
 std::istream &operator>>(std::istream &in, Polygon &poly)
 {
-  size_t num;
+  size_t num = 0;
   if (!(in >> num))
     return in;
+
+  // Условие 1: Меньше 3 вершин — брак
+  if (num < 3)
+  {
+    in.setstate(std::ios::failbit);
+    return in;
+  }
+
   poly.points.resize(num);
+
+  // Условие 2 и 3: Читаем ровно num точек
   for (size_t i = 0; i < num; ++i)
   {
     if (!(in >> poly.points[i]))
@@ -40,5 +70,6 @@ std::istream &operator>>(std::istream &in, Polygon &poly)
       return in;
     }
   }
+
   return in;
 }
