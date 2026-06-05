@@ -1,5 +1,4 @@
 #include <iostream>
-#include <limits>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -8,6 +7,7 @@
 #include <numeric>
 #include <iomanip>
 #include <iterator>
+#include <limits>
 #include "Polygon.hpp"
 
 // Реализация AREA разновидностей
@@ -79,6 +79,7 @@ void handleMax(const std::vector<Polygon> &polygons, std::istream &is)
   if (polygons.empty())
   {
     std::cout << "<INVALID COMMAND>\n";
+    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return;
   }
   std::string arg;
@@ -100,6 +101,8 @@ void handleMax(const std::vector<Polygon> &polygons, std::istream &is)
   else
   {
     std::cout << "<INVALID COMMAND>\n";
+    is.clear();
+    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
   }
 }
 void handleMin(const std::vector<Polygon> &polygons, std::istream &is)
@@ -107,6 +110,7 @@ void handleMin(const std::vector<Polygon> &polygons, std::istream &is)
   if (polygons.empty())
   {
     std::cout << "<INVALID COMMAND>\n";
+    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return;
   }
   std::string arg;
@@ -128,6 +132,8 @@ void handleMin(const std::vector<Polygon> &polygons, std::istream &is)
   else
   {
     std::cout << "<INVALID COMMAND>\n";
+    is.clear();
+    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
   }
 }
 void handleCount(const std::vector<Polygon> &polygons, std::istream &is)
@@ -168,11 +174,10 @@ void handleCount(const std::vector<Polygon> &polygons, std::istream &is)
 void handleEcho(std::vector<Polygon> &polygons, std::istream &is)
 {
   Polygon target;
-  if (!(is >> target))
-  {
-    std::cout << "<INVALID COMMAND>\n";
+  if (!(is >> target)) {
     is.clear();
     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "<INVALID COMMAND>\n";
     return;
   }
   std::vector<Polygon> updatedCollection;
@@ -193,11 +198,10 @@ void handleEcho(std::vector<Polygon> &polygons, std::istream &is)
 void handleInFrame(const std::vector<Polygon> &polygons, std::istream &is)
 {
   Polygon target;
-  if (!(is >> target) || polygons.empty())
-  {
-    std::cout << "<INVALID COMMAND>\n";
+  if (!(is >> target)) {
     is.clear();
     is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "<INVALID COMMAND>\n";
     return;
   }
 
