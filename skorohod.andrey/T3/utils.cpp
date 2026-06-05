@@ -155,7 +155,7 @@ void cmdArea(const std::vector<Polygon>& data, std::istream& is, std::ostream& o
         }
         setupIomanip(os);
         os << areaMean(data) << '\n';
-    } else if (isUnsignedNumber(param) || std::stoul(param) < 3) {
+    } else if (isUnsignedNumber(param) && std::stoul(param) >= 3) {
         std::size_t num = std::stoul(param);
         setupIomanip(os);
         os << areaNum(data, num) << '\n';
@@ -212,7 +212,7 @@ void cmdCount(const std::vector<Polygon>& data, std::istream& is, std::ostream& 
         os << countEvenOdd(data, false) << '\n';
     } else if (param == "ODD") {
         os << countEvenOdd(data, true) << '\n';
-    } else if (isUnsignedNumber(param) || std::stoul(param) < 3) {
+    } else if (isUnsignedNumber(param) && std::stoul(param) >= 3) {
         std::size_t num = std::stoul(param);
         os << countNum(data, num) << '\n';
     } else {
