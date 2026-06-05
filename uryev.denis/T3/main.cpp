@@ -10,6 +10,7 @@
 #include <limits>
 #include "Polygon.hpp"
 
+// Реализация AREA разновидностей
 void handleArea(const std::vector<Polygon>& polygons, std::istream& is)
 {
   std::string arg;
@@ -26,7 +27,8 @@ void handleArea(const std::vector<Polygon>& polygons, std::istream& is)
       polygons.end(), 0.0,
       [](double sum, const Polygon& p)
       {
-        return sum + (p.points.size() % 2 == 0 ? getArea(p) : 0.0);
+        bool isEven = (p.points.size() % 2 == 0);
+        return sum + (isEven ? getArea(p) : 0.0);
       });
   }
   else if (arg == "ODD")
@@ -35,7 +37,8 @@ void handleArea(const std::vector<Polygon>& polygons, std::istream& is)
       polygons.end(), 0.0,
       [](double sum, const Polygon& p)
       {
-        return sum + (p.points.size() % 2 != 0 ? getArea(p) : 0.0);
+        bool isOdd = (p.points.size() % 2 != 0);
+        return sum + (isOdd ? getArea(p) : 0.0);
       });
   }
   else if (arg == "MEAN")
@@ -64,7 +67,8 @@ void handleArea(const std::vector<Polygon>& polygons, std::istream& is)
         polygons.end(), 0.0,
         [numVertexes](double sum, const Polygon& p)
         {
-          return sum + (p.points.size() == numVertexes ? getArea(p) : 0.0);
+          bool match = (p.points.size() == numVertexes);
+          return sum + (match ? getArea(p) : 0.0);
         });
     }
     catch (...)
@@ -106,7 +110,8 @@ void handleMax(const std::vector<Polygon>& polygons, std::istream& is)
   {
     if (is >> dummy) { std::cout << "<INVALID COMMAND>\n"; return; }
     auto it = std::max_element(polygons.begin(),
-      polygons.end(), [](const Polygon& a, const Polygon& b)
+      polygons.end(),
+      [](const Polygon& a, const Polygon& b)
       { return getArea(a) < getArea(b); });
     std::cout << std::fixed << std::setprecision(1) << getArea(*it) << "\n";
   }
@@ -114,7 +119,8 @@ void handleMax(const std::vector<Polygon>& polygons, std::istream& is)
   {
     if (is >> dummy) { std::cout << "<INVALID COMMAND>\n"; return; }
     auto it = std::max_element(polygons.begin(),
-      polygons.end(), [](const Polygon& a, const Polygon& b)
+      polygons.end(),
+      [](const Polygon& a, const Polygon& b)
       { return a.points.size() < b.points.size(); });
     std::cout << it->points.size() << "\n";
   }
@@ -145,7 +151,8 @@ void handleMin(const std::vector<Polygon>& polygons, std::istream& is)
   {
     if (is >> dummy) { std::cout << "<INVALID COMMAND>\n"; return; }
     auto it = std::min_element(polygons.begin(),
-      polygons.end(), [](const Polygon& a, const Polygon& b)
+      polygons.end(),
+      [](const Polygon& a, const Polygon& b)
       { return getArea(a) < getArea(b); });
     std::cout << std::fixed << std::setprecision(1) << getArea(*it) << "\n";
   }
@@ -153,7 +160,8 @@ void handleMin(const std::vector<Polygon>& polygons, std::istream& is)
   {
     if (is >> dummy) { std::cout << "<INVALID COMMAND>\n"; return; }
     auto it = std::min_element(polygons.begin(),
-      polygons.end(), [](const Polygon& a, const Polygon& b)
+      polygons.end(),
+      [](const Polygon& a, const Polygon& b)
       { return a.points.size() < b.points.size(); });
     std::cout << it->points.size() << "\n";
   }
@@ -177,13 +185,15 @@ void handleCount(const std::vector<Polygon>& polygons, std::istream& is)
   if (arg == "EVEN")
   {
     count = std::count_if(polygons.begin(),
-      polygons.end(), [](const Polygon& p)
+      polygons.end(),
+      [](const Polygon& p)
       { return p.points.size() % 2 == 0; });
   }
   else if (arg == "ODD")
   {
     count = std::count_if(polygons.begin(),
-      polygons.end(), [](const Polygon& p)
+      polygons.end(),
+      [](const Polygon& p)
       { return p.points.size() % 2 != 0; });
   }
   else
@@ -193,7 +203,8 @@ void handleCount(const std::vector<Polygon>& polygons, std::istream& is)
       size_t numVertexes = std::stoull(arg);
       if (numVertexes < 3) throw std::invalid_argument("");
       count = std::count_if(polygons.begin(),
-        polygons.end(), [numVertexes](const Polygon& p)
+        polygons.end(),
+        [numVertexes](const Polygon& p)
         { return p.points.size() == numVertexes; });
     }
     catch (...)
@@ -219,7 +230,6 @@ void handleEcho(std::vector<Polygon>& polygons, std::istream& is)
   Polygon target;
   char dummy;
 
-  // Читаем полигон и проверяем, что в текущей строке нет лишнего мусора
   if (!(is >> target) || (is >> dummy))
   {
     std::cout << "<INVALID COMMAND>\n";
@@ -231,7 +241,8 @@ void handleEcho(std::vector<Polygon>& polygons, std::istream& is)
   size_t addedCount = 0;
 
   std::for_each(polygons.begin(),
-    polygons.end(), [&](const Polygon& p)
+    polygons.end(),
+    [&](const Polygon& p)
     {
       updatedCollection.push_back(p);
       if (isPolygonEqual(p, target))
@@ -251,7 +262,6 @@ void handleInFrame(const std::vector<Polygon>& polygons, std::istream& is)
   Polygon target;
   char dummy;
 
-  // Читаем полигон и проверяем на ошибки/лишний мусор/пустую коллекцию
   if (!(is >> target) || (is >> dummy) || polygons.empty())
   {
     std::cout << "<INVALID COMMAND>\n";
@@ -295,7 +305,6 @@ int main(int argc, char* argv[])
     if (ss >> poly)
     {
       char dummy;
-      // Если полигон прочитался, но в строке файла остался мусор — строка невалидна
       if (!(ss >> dummy))
       {
         polygons.push_back(poly);
@@ -304,7 +313,6 @@ int main(int argc, char* argv[])
   }
   file.close();
 
-  // Главный цикл обработки команд (построчный)
   while (std::getline(std::cin, line))
   {
     if (line.empty()) continue;
