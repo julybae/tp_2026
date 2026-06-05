@@ -8,7 +8,7 @@ HuffmanNode::HuffmanNode(char ch, size_t freq)
 
 bool NodeComparator::operator()(const std::unique_ptr<HuffmanNode> &lhs, const std::unique_ptr<HuffmanNode> &rhs) const
 {
-  return lhs->frequency > rhs->frequency; // Элемент с меньшей частотой имеет больший приоритет
+  return lhs->frequency > rhs->frequency;
 }
 
 void HuffmanEncoder::generateCodes(const HuffmanNode *node, const std::string &currentCode)
@@ -16,7 +16,6 @@ void HuffmanEncoder::generateCodes(const HuffmanNode *node, const std::string &c
   if (!node)
     return;
 
-  // Если это листовой узел, сохраняем код символа
   if (!node->left && !node->right)
   {
     codeTable[node->character] = currentCode;
@@ -36,14 +35,12 @@ void HuffmanEncoder::buildTree(const std::string &text)
   treeRoot.reset();
   codeTable.clear();
 
-  // 1. Быстрый частотный анализ текста с помощью std::map за O(L log N)
   std::map<char, size_t> frequencies;
   for (char ch : text)
   {
     frequencies[ch]++;
   }
 
-  // 2. Инициализация стандартной очереди с приоритетами
   std::priority_queue<std::unique_ptr<HuffmanNode>,
                       std::vector<std::unique_ptr<HuffmanNode>>,
                       NodeComparator>
@@ -54,7 +51,6 @@ void HuffmanEncoder::buildTree(const std::string &text)
     priorityQueue.push(std::make_unique<HuffmanNode>(ch, freq));
   }
 
-  // 3. Построение бинарного дерева Хаффмана
   while (priorityQueue.size() > 1)
   {
     auto leftNode = std::move(const_cast<std::unique_ptr<HuffmanNode> &>(priorityQueue.top()));
@@ -70,11 +66,9 @@ void HuffmanEncoder::buildTree(const std::string &text)
     priorityQueue.push(std::move(parentNode));
   }
 
-  // Последний оставшийся узел становится корнем дерева
   treeRoot = std::move(const_cast<std::unique_ptr<HuffmanNode> &>(priorityQueue.top()));
   priorityQueue.pop();
 
-  // 4. Рекурсивное заполнение таблицы кодов
   generateCodes(treeRoot.get(), "");
 }
 
@@ -86,7 +80,7 @@ std::string HuffmanEncoder::encode(const std::string &text) const
   std::string encodedResult;
   for (char ch : text)
   {
-    encodedResult += codeTable.at(ch); // O(log N) поиск кода в std::map
+    encodedResult += codeTable.at(ch);
   }
   return encodedResult;
 }
@@ -111,7 +105,7 @@ std::string HuffmanEncoder::decode(const std::string &bitstream) const
     if (!currentNode->left && !currentNode->right)
     {
       decodedResult += currentNode->character;
-      currentNode = treeRoot.get(); // Возврат к корню
+      currentNode = treeRoot.get();
     }
   }
   return decodedResult;
