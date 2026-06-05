@@ -1,7 +1,6 @@
 #include "DataStruct.h"
 #include <cstdlib>
 #include <algorithm>
-#include <cctype>
 
 // ============ КОНСТРУКТОРЫ ============
 DataStruct::DataStruct() : key1(0), key2('\0'), key3("") {}
@@ -39,7 +38,7 @@ void DataStruct::swap(DataStruct& other) noexcept {
     swap(key3, other.key3);
 }
 
-// ============ ПАРСЕР KEY1 (ULL HEX) ============
+// ============ ПАРСЕР KEY1 ============
 bool DataStruct::parseKey1(const std::string& valueStr,
                            unsigned long long& result) {
     std::string trimmed = valueStr;
@@ -59,7 +58,7 @@ bool DataStruct::parseKey1(const std::string& valueStr,
     return true;
 }
 
-// ============ ПАРСЕР KEY2 (CHR LIT) ============
+// ============ ПАРСЕР KEY2 ============
 bool DataStruct::parseKey2(const std::string& valueStr, char& result) {
     std::string trimmed = valueStr;
     size_t start = trimmed.find_first_not_of(" \t");
@@ -74,7 +73,7 @@ bool DataStruct::parseKey2(const std::string& valueStr, char& result) {
     return true;
 }
 
-// ============ ПАРСЕР KEY3 (STRING) ============
+// ============ ПАРСЕР KEY3 ============
 bool DataStruct::parseKey3(const std::string& valueStr, std::string& result) {
     std::string trimmed = valueStr;
     size_t start = trimmed.find_first_not_of(" \t");
@@ -101,16 +100,12 @@ std::istream& operator>>(std::istream& is, DataStruct& data) {
     std::string line;
 
     while (std::getline(is, line)) {
-        // Ищем открывающую скобку
         size_t openParen = line.find('(');
         if (openParen == std::string::npos) continue;
 
-        // Ищем закрывающую скобку
         size_t closeParen = line.rfind(')');
-        if (closeParen == std::string::npos ||
-            closeParen <= openParen) continue;
+        if (closeParen == std::string::npos || closeParen <= openParen) continue;
 
-        // Извлекаем содержимое между скобками
         std::string content = line.substr(openParen + 1,
                                           closeParen - openParen - 1);
 
@@ -121,51 +116,68 @@ std::istream& operator>>(std::istream& is, DataStruct& data) {
 
         size_t pos = 0;
         while (pos < content.length()) {
-            // Ищем двоеточие (начало поля)
             size_t colonPos = content.find(':', pos);
             if (colonPos == std::string::npos) break;
 
-            // Ищем пробел после имени поля
             size_t spacePos = content.find(' ', colonPos + 1);
             if (spacePos == std::string::npos) break;
 
-            // Имя поля
             std::string fieldName = content.substr(colonPos + 1,
                                                    spacePos - colonPos - 1);
 
-            // Ищем следующее двоеточие (конец значения)
-            size_t nextColon = content.find(':', spacePos + 1);
-            std::string fieldValue;
-            if (nextColon == std::string::npos) {
-                fieldValue = content.substr(spacePos + 1);
-            } else {
-                fieldValue = content.substr(spacePos + 1,
-                                           nextColon - spacePos - 1);
-            }
-            pos = (nextColon == std::string::npos) ?
-                  content.length() : nextColon;
+            // Для key3 нужно искать закрывающую кавычку, а не двоеточие
+            if (fieldName == "key3") {
+                // Ищем начало значения (после пробела)
+                size_t valStart = spacePos + 1;
+                if (valStart >= content.length()) break;
 
-            // Парсим поле
-            if (fieldName == "key1") {
-                foundKey1 = DataStruct::parseKey1(fieldValue, k1);
-            } else if (fieldName == "key2") {
-                foundKey2 = DataStruct::parseKey2(fieldValue, k2);
-            } else if (fieldName == "key3") {
+                // Ищем закрывающую кавычку
+                size_t quotePos = content.find('"', valStart);
+                if (quotePos == std::string::npos) break;
+
+                // Ищем вторую кавычку (закрывающую)
+                size_t endQuotePos = content.find('"', quotePos + 1);
+                if (endQuotePos == std::string::npos) break;
+
+                // Значение — между кавычками
+                std::string fieldValue = content.substr(quotePos,
+                                                        endQuotePos - quotePos + 1);
+
+                // Ищем следующее двоеточие после закрывающей кавычки
+                size_t nextColon = content.find(':', endQuotePos + 1);
+                pos = (nextColon == std::string::npos) ?
+                      content.length() : nextColon;
+
                 foundKey3 = DataStruct::parseKey3(fieldValue, k3);
+            } else {
+                // Для key1 и key2 ищем следующее двоеточие
+                size_t nextColon = content.find(':', spacePos + 1);
+                std::string fieldValue;
+                if (nextColon == std::string::npos) {
+                    fieldValue = content.substr(spacePos + 1);
+                } else {
+                    fieldValue = content.substr(spacePos + 1,
+                                               nextColon - spacePos - 1);
+                }
+                pos = (nextColon == std::string::npos) ?
+                      content.length() : nextColon;
+
+                if (fieldName == "key1") {
+                    foundKey1 = DataStruct::parseKey1(fieldValue, k1);
+                } else if (fieldName == "key2") {
+                    foundKey2 = DataStruct::parseKey2(fieldValue, k2);
+                }
             }
         }
 
-        // Если нашли все три поля — заполняем структуру и возвращаем
         if (foundKey1 && foundKey2 && foundKey3) {
             data.key1 = k1;
             data.key2 = k2;
             data.key3 = k3;
             return is;
         }
-        // Иначе продолжаем цикл — ищем следующую строку
     }
 
-    // Если дошли сюда — поток закончился или нет правильных строк
     is.setstate(std::ios::failbit);
     return is;
 }
@@ -179,7 +191,7 @@ std::ostream& operator<<(std::ostream& os, const DataStruct& data) {
     return os;
 }
 
-// ============ КОМПАРАТОР ДЛЯ СОРТИРОВКИ ============
+// ============ КОМПАРАТОР ============
 bool DataStructComparator::operator()(const DataStruct& lhs,
                                       const DataStruct& rhs) const {
     if (lhs.key1 != rhs.key1) {
