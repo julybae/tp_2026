@@ -7,7 +7,9 @@ double getArea(const Polygon& p) {
     size_t n = p.points.size();
     if (n < 3) return 0.0;
     for (size_t i = 0; i < n; ++i) {
-        area += (p.points[i].x * p.points[(i + 1) % n].y - p.points[(i + 1) % n].x * p.points[i].y);
+        // Вычисляем площадь без использования C-style cast
+        area += (static_cast<double>(p.points[i].x) * p.points[(i + 1) % n].y -
+                 static_cast<double>(p.points[(i + 1) % n].x) * p.points[i].y);
     }
     return std::abs(area) / 2.0;
 }
@@ -16,22 +18,32 @@ struct Segment { Point a, b; };
 
 bool segmentsIntersect(Segment s1, Segment s2) {
     auto cross_product = [](Point a, Point b, Point c) {
-        return (long long)(b.x - a.x) * (c.y - a.y) - (long long)(b.y - a.y) * (c.x - a.x);
+        // Заменяем (long long) на static_cast<long long>
+        long long dx1 = static_cast<long long>(b.x) - a.x;
+        long long dy1 = static_cast<long long>(c.y) - a.y;
+        long long dy2 = static_cast<long long>(b.y) - a.y;
+        long long dx2 = static_cast<long long>(c.x) - a.x;
+        return dx1 * dy1 - dy2 * dx2;
     };
+
     auto on_segment = [](Point p, Segment s) {
         return p.x <= std::max(s.a.x, s.b.x) && p.x >= std::min(s.a.x, s.b.x) &&
                p.y <= std::max(s.a.y, s.b.y) && p.y >= std::min(s.a.y, s.b.y);
     };
+
     long long d1 = cross_product(s2.a, s2.b, s1.a);
     long long d2 = cross_product(s2.a, s2.b, s1.b);
     long long d3 = cross_product(s1.a, s1.b, s2.a);
     long long d4 = cross_product(s1.a, s1.b, s2.b);
 
-    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+        ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+
     if (d1 == 0 && on_segment(s1.a, s2)) return true;
     if (d2 == 0 && on_segment(s1.b, s2)) return true;
     if (d3 == 0 && on_segment(s2.a, s1)) return true;
     if (d4 == 0 && on_segment(s2.b, s1)) return true;
+
     return false;
 }
 
