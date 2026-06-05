@@ -29,14 +29,6 @@ int main(int argc, char* argv[])
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
-    for (auto p : polygons)
-    {
-        for (auto i : p.points)
-        {
-            std::cout << i.x << ',' << i.y <<' ';
-        }
-        std::cout << '\n';
-    }
     using namespace std::placeholders;
     std::map<std::string, std::function<void(std::istream&, std::ostream&)>> commandMap;
 
