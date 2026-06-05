@@ -11,7 +11,7 @@ struct DataStruct
   double key2;               // DBL SCI
   std::string key3;
 
-  DataStruct() : key1(0.0, 0.0), key2(0.0), key3("") {}
+  DataStruct() {}
 };
 
 struct DelimiterIO

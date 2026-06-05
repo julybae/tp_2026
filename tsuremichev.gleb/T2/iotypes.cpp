@@ -1,6 +1,5 @@
 #include "iotypes.hpp"
 
-// Реализация оператора для DelimetrIO
 std::istream &operator>>(std::istream &in, DelimetrIO &&dest)
 {
   std::istream::sentry sentry(in);
@@ -18,7 +17,6 @@ std::istream &operator>>(std::istream &in, DelimetrIO &&dest)
   return in;
 }
 
-// перегрузка оператора ввода дл¤ структуры UllHexIO
 std::istream &operator>>(std::istream &in, UllHexIO &&dest)
 {
 
@@ -33,7 +31,6 @@ std::istream &operator>>(std::istream &in, UllHexIO &&dest)
   return in;
 }
 
-// перегрузка оператора ввода дл¤ структуры RationalIO
 std::istream &operator>>(std::istream &in, RationalIO &&dest)
 {
   std::istream::sentry sentry(in);
@@ -63,7 +60,6 @@ std::istream &operator>>(std::istream &in, RationalIO &&dest)
   return in;
 }
 
-// перегрузка оператора ввода дл¤ структуры StringIO
 std::istream &operator>>(std::istream &in, StringIO &&dest)
 {
   std::istream::sentry sentry(in);
@@ -74,7 +70,6 @@ std::istream &operator>>(std::istream &in, StringIO &&dest)
   return std::getline(in >> DelimetrIO{'"'}, dest.ref, '"');
 }
 
-// перегрузка оператора ввода дл¤ структуры KeyIO
 std::istream &operator>>(std::istream &in, KeyIO &&dest)
 {
   std::istream::sentry sentry(in);
