@@ -1,15 +1,10 @@
-﻿#include <iostream>
+﻿#include "data_struct.cpp"
+#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <string>
 #include <sstream>
+#include <string>
 #include <iomanip>
-
-struct DataStruct {
-    char key1;
-    unsigned long long key2;
-    std::string key3;
-};
 
 std::istream& operator>>(std::istream& in, DataStruct& data) {
     std::string line;
@@ -62,11 +57,24 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
             if (keyValue.size() == 3 && keyValue[0] == '\'' && keyValue[2] == '\'') {
                 k1 = keyValue[1];
                 hasKey1 = true;
-            } else {
-                in.setstate(std::ios::failbit);
-                return in;
             }
-        } else if (keyName == "key2") {
+            else if (keyValue.find('.') != std::string::npos || keyValue.find('e') != std::string::npos || keyValue.find('E') != std::string::npos) {
+                double d;
+                try {
+                    d = std::stod(keyValue);
+                    k1 = static_cast<char>(d);
+                    hasKey1 = true;
+                } catch(...) {}
+            }
+            else {
+                try {
+                    long long ll = std::stoll(keyValue);
+                    k1 = static_cast<char>(ll);
+                    hasKey1 = true;
+                } catch(...) {}
+            }
+        }
+        else if (keyName == "key2") {
             if (keyValue.size() > 2 && keyValue[0] == '0' && (keyValue[1] == 'x' || keyValue[1] == 'X')) {
                 k2 = 0;
                 for (size_t i = 2; i < keyValue.size(); ++i) {
@@ -77,17 +85,18 @@ std::istream& operator>>(std::istream& in, DataStruct& data) {
                     else { in.setstate(std::ios::failbit); return in; }
                 }
                 hasKey2 = true;
-            } else {
-                in.setstate(std::ios::failbit);
-                return in;
             }
-        } else if (keyName == "key3") {
+            else {
+                try {
+                    k2 = std::stoull(keyValue);
+                    hasKey2 = true;
+                } catch(...) {}
+            }
+        }
+        else if (keyName == "key3") {
             if (keyValue.size() >= 2 && keyValue[0] == '"' && keyValue.back() == '"') {
                 k3 = keyValue.substr(1, keyValue.size() - 2);
                 hasKey3 = true;
-            } else {
-                in.setstate(std::ios::failbit);
-                return in;
             }
         }
     }
