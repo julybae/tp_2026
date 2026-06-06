@@ -3,6 +3,9 @@
 #include <vector>
 #include "Dictionary.hpp"
 
+/**
+ * Вспомогательная функция для красивого вывода результатов поиска
+ */
 void printSearchResult(const Dictionary& dict, const std::string& word) {
     std::cout << "Searching for '" << word << "': ";
 
@@ -21,6 +24,7 @@ void printSearchResult(const Dictionary& dict, const std::string& word) {
     }
 }
 
+// Вспомогательная функция для проверки наличия слова
 void checkWord(const Dictionary& dict, const std::string& word) {
     const TranslationList* list = dict.search(word);
     std::cout << "Word '" << word << "': "

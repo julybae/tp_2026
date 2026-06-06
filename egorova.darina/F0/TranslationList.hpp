@@ -4,6 +4,10 @@
 #include <string>
 #include <set>
 
+/**
+ * Класс хранит список переводов для одного английского слова.
+ * Согласно заданию, переводы отсортированы по алфавиту.
+ */
 class TranslationList {
 public:
     void addTranslation(const std::string& translation) {
@@ -17,6 +21,7 @@ public:
     }
 
 private:
+    // std::set всегда хранит элементы отсортированными
     std::set<std::string> mTranslations;
 };
 
