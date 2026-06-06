@@ -8,28 +8,24 @@
 double getArea(const Polygon& p) {
     if (p.points.size() < 3) return 0.0;
 
-    // inner_product суммирует результаты операции над парами элементов
     double area = std::inner_product(
-        p.points.begin(), std::prev(p.points.end()), // Первая точка в паре (от 0 до n-2)
-        std::next(p.points.begin()),                // Вторая точка в паре (от 1 до n-1)
-        0.0,                                        // Начальная сумма
-        std::plus<double>(),                        // Суммируем результаты лямбды
+        p.points.begin(), std::prev(p.points.end()),
+        std::next(p.points.begin()),
+        0.0,
+        std::plus<double>(),
         [](const Point& a, const Point& b) {
             return static_cast<double>(a.x) * b.y - static_cast<double>(b.x) * a.y;
         }
     );
 
-    // Добавляем замыкающее звено (последняя точка -> первая точка)
     area += static_cast<double>(p.points.back().x) * p.points.front().y -
             static_cast<double>(p.points.front().x) * p.points.back().y;
 
     return std::abs(area) / 2.0;
 }
 
-// Вспомогательная структура для работы с отрезками через STL
 struct Segment { Point a, b; };
 
-// Функция проверки пересечения двух отрезков (без изменений логики)
 bool segmentsIntersect(Segment s1, Segment s2) {
     auto cp = [](Point a, Point b, Point c) {
         return static_cast<long long>(b.x - a.x) * (c.y - a.y) -
@@ -51,25 +47,34 @@ bool segmentsIntersect(Segment s1, Segment s2) {
 
 // 2. Проверка точки внутри полигона через std::inner_product (Ray Casting)
 bool isInside(Point pt, const Polygon& poly) {
-    auto points = poly.points;
-    // Используем inner_product как счетчик пересечений луча
-    return std::inner_product(
-        points.begin(), points.end(),
-        points.begin() + 1 == points.end() ? points.begin() : points.begin() + 1, // Закольцованный итератор
-        false, // Начальное состояние (четность пересечений)
-        std::bit_xor<bool>(), // Каждое пересечение инвертирует результат (чётное/нечётное)
+    const auto& pts = poly.points;
+    if (pts.size() < 3) return false;
+
+    bool res = std::inner_product(
+        pts.begin(), std::prev(pts.end()),
+        std::next(pts.begin()),
+        false,
+        std::bit_xor<bool>(),
         [&pt](const Point& pi, const Point& pj) {
             return ((pi.y > pt.y) != (pj.y > pt.y)) &&
                    (pt.x < (pj.x - pi.x) * (pt.y - pi.y) / static_cast<double>(pj.y - pi.y) + pi.x);
         }
     );
+
+    if (((pts.back().y > pt.y) != (pts.front().y > pt.y)) &&
+        (pt.x < (pts.front().x - pts.back().x) * (pt.y - pts.back().y) /
+        static_cast<double>(pts.front().y - pts.back().y) + pts.back().x)) {
+        res = !res;
+    }
+
+    return res;
 }
 
 // 3. Проверка пересечения полигонов через std::any_of
 bool polygonsIntersect(const Polygon& p1, const Polygon& p2) {
-    // Вместо вложенных циклов используем any_of
+    if (p1.points.size() < 3 || p2.points.size() < 3) return false;
+
     bool borderIntersect = std::any_of(p1.points.begin(), p1.points.end(), [&](const Point& p1a) {
-        // Находим следующую точку для формирования отрезка p1
         const Point& p1b = (&p1a == &p1.points.back()) ? p1.points.front() : *(&p1a + 1);
         Segment s1 = {p1a, p1b};
 
@@ -82,6 +87,5 @@ bool polygonsIntersect(const Polygon& p1, const Polygon& p2) {
 
     if (borderIntersect) return true;
 
-    // Проверка, если один полигон полностью внутри другого
     return isInside(p1.points.front(), p2) || isInside(p2.points.front(), p1);
 }
