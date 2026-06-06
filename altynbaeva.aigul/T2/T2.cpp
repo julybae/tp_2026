@@ -39,6 +39,14 @@ bool parseUnsignedLongLong(const std::string& s, unsigned long long& v) {
     } else if (!str.empty() && (str.back() == 'u' || str.back() == 'U')) {
         str.pop_back();
     }
+    if (str.empty()) {
+        v = 0;
+        return true;
+    }
+    if (str.size() == 1 && str[0] == '0') {
+        v = 0;
+        return true;
+    }
     if (str.size() > 1 && str[0] == '0' && str[1] != 'x' && str[1] != 'X' &&
         str[1] != 'b' && str[1] != 'B') {
         try { v = std::stoull(str, nullptr, 8); return true; }
