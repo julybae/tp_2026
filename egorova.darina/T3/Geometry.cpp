@@ -1,14 +1,26 @@
 #include "Geometry.h"
 #include <cmath>
 #include <algorithm>
+#include <numeric>
+#include <iterator>
 
 double getArea(const Polygon& p) {
-    double area = 0.0; size_t n = p.points.size();
-    for (size_t i = 0; i < n; ++i) {
-        area += (static_cast<double>(p.points[i].x) * p.points[(i + 1) % n].y -
-                 static_cast<double>(p.points[(i + 1) % n].x) * p.points[i].y);
-    }
-    return std::abs(area) / 2.0;
+    if (p.points.size() < 3) return 0.0;
+
+    double res = std::inner_product(
+        p.points.begin(), std::prev(p.points.end()),
+        std::next(p.points.begin()),
+        0.0,
+        std::plus<double>(),
+        [](const Point& a, const Point& b) {
+            return static_cast<double>(a.x) * b.y - static_cast<double>(b.x) * a.y;
+        }
+    );
+
+    res += static_cast<double>(p.points.back().x) * p.points.front().y -
+           static_cast<double>(p.points.front().x) * p.points.back().y;
+
+    return std::abs(res) / 2.0;
 }
 
 struct Segment { Point a, b; };
