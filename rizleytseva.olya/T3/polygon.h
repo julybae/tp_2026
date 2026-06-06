@@ -115,3 +115,4 @@ struct VertexCountAreaAccumulator
 };
 
 #endif // POLYGON_H
+

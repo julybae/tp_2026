@@ -293,3 +293,4 @@ double VertexCountAreaAccumulator::operator()(double acc, const Polygon& p) cons
   }
   return acc;
 }
+

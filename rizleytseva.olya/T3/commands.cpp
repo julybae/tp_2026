@@ -1,14 +1,25 @@
 #include "commands.h"
+#include "polygon.h"
 #include "iofmtguard.hpp"
 #include <algorithm>
 #include <numeric>
 #include <iomanip>
 #include <string>
+#include <sstream>
 #include <stdexcept>
+#include <map>
+#include <functional>
+
+// ============ ГЛОБАЛЬНАЯ КОЛЛЕКЦИЯ ПОЛИГОНОВ ============
+static std::vector< Polygon > g_polys;
+
+void setPolygons(const std::vector< Polygon >& polys)
+{
+  g_polys = polys;
+}
 
 // ============ AREA ============
-void cmdArea(const std::vector< Polygon >& polys,
-             std::istream& is, std::ostream& os)
+void cmdArea(std::istream& is, std::ostream& os)
 {
   std::string param;
   if (!(is >> param))
@@ -21,25 +32,25 @@ void cmdArea(const std::vector< Polygon >& polys,
 
   if (param == "EVEN")
   {
-    double sum = std::accumulate(polys.begin(), polys.end(), 0.0,
+    double sum = std::accumulate(g_polys.begin(), g_polys.end(), 0.0,
                                  ConditionalAreaAccumulator(true));
     os << sum << '\n';
   }
   else if (param == "ODD")
   {
-    double sum = std::accumulate(polys.begin(), polys.end(), 0.0,
+    double sum = std::accumulate(g_polys.begin(), g_polys.end(), 0.0,
                                  ConditionalAreaAccumulator(false));
     os << sum << '\n';
   }
   else if (param == "MEAN")
   {
-    if (polys.empty())
+    if (g_polys.empty())
     {
       throw std::runtime_error("Empty dataset for AREA MEAN");
     }
-    double sum = std::accumulate(polys.begin(), polys.end(), 0.0,
+    double sum = std::accumulate(g_polys.begin(), g_polys.end(), 0.0,
                                  AreaAccumulator{});
-    os << sum / static_cast< double >(polys.size()) << '\n';
+    os << sum / static_cast< double >(g_polys.size()) << '\n';
   }
   else
   {
@@ -56,17 +67,16 @@ void cmdArea(const std::vector< Polygon >& polys,
     {
       throw std::runtime_error("Vertex count must be >= 3");
     }
-    double sum = std::accumulate(polys.begin(), polys.end(), 0.0,
+    double sum = std::accumulate(g_polys.begin(), g_polys.end(), 0.0,
                                  VertexCountAreaAccumulator(n));
     os << sum << '\n';
   }
 }
 
 // ============ MAX ============
-void cmdMax(const std::vector< Polygon >& polys,
-            std::istream& is, std::ostream& os)
+void cmdMax(std::istream& is, std::ostream& os)
 {
-  if (polys.empty())
+  if (g_polys.empty())
   {
     throw std::runtime_error("Empty collection for MAX");
   }
@@ -79,13 +89,13 @@ void cmdMax(const std::vector< Polygon >& polys,
 
   if (param == "AREA")
   {
-    auto it = std::max_element(polys.begin(), polys.end(), AreaLess{});
+    auto it = std::max_element(g_polys.begin(), g_polys.end(), AreaLess{});
     iofmtguard guard(os);
     os << std::fixed << std::setprecision(1) << getArea(*it) << '\n';
   }
   else if (param == "VERTEXES")
   {
-    auto it = std::max_element(polys.begin(), polys.end(), VertexCountLess{});
+    auto it = std::max_element(g_polys.begin(), g_polys.end(), VertexCountLess{});
     os << it->points.size() << '\n';
   }
   else
@@ -95,10 +105,9 @@ void cmdMax(const std::vector< Polygon >& polys,
 }
 
 // ============ MIN ============
-void cmdMin(const std::vector< Polygon >& polys,
-            std::istream& is, std::ostream& os)
+void cmdMin(std::istream& is, std::ostream& os)
 {
-  if (polys.empty())
+  if (g_polys.empty())
   {
     throw std::runtime_error("Empty collection for MIN");
   }
@@ -111,13 +120,13 @@ void cmdMin(const std::vector< Polygon >& polys,
 
   if (param == "AREA")
   {
-    auto it = std::min_element(polys.begin(), polys.end(), AreaLess{});
+    auto it = std::min_element(g_polys.begin(), g_polys.end(), AreaLess{});
     iofmtguard guard(os);
     os << std::fixed << std::setprecision(1) << getArea(*it) << '\n';
   }
   else if (param == "VERTEXES")
   {
-    auto it = std::min_element(polys.begin(), polys.end(), VertexCountLess{});
+    auto it = std::min_element(g_polys.begin(), g_polys.end(), VertexCountLess{});
     os << it->points.size() << '\n';
   }
   else
@@ -127,8 +136,7 @@ void cmdMin(const std::vector< Polygon >& polys,
 }
 
 // ============ COUNT ============
-void cmdCount(const std::vector< Polygon >& polys,
-              std::istream& is, std::ostream& os)
+void cmdCount(std::istream& is, std::ostream& os)
 {
   std::string param;
   if (!(is >> param))
@@ -138,11 +146,11 @@ void cmdCount(const std::vector< Polygon >& polys,
 
   if (param == "EVEN")
   {
-    os << std::count_if(polys.begin(), polys.end(), EvenVertexPred{}) << '\n';
+    os << std::count_if(g_polys.begin(), g_polys.end(), EvenVertexPred{}) << '\n';
   }
   else if (param == "ODD")
   {
-    os << std::count_if(polys.begin(), polys.end(), OddVertexPred{}) << '\n';
+    os << std::count_if(g_polys.begin(), g_polys.end(), OddVertexPred{}) << '\n';
   }
   else
   {
@@ -159,13 +167,12 @@ void cmdCount(const std::vector< Polygon >& polys,
     {
       throw std::runtime_error("Vertex count must be >= 3");
     }
-    os << std::count_if(polys.begin(), polys.end(), VertexCountPred(n)) << '\n';
+    os << std::count_if(g_polys.begin(), g_polys.end(), VertexCountPred(n)) << '\n';
   }
 }
 
 // ============ LESSAREA ============
-void cmdLessArea(const std::vector< Polygon >& polys,
-                 std::istream& is, std::ostream& os)
+void cmdLessArea(std::istream& is, std::ostream& os)
 {
   Polygon target;
   if (!(is >> target))
@@ -173,35 +180,27 @@ void cmdLessArea(const std::vector< Polygon >& polys,
     throw std::runtime_error("Invalid polygon for LESSAREA");
   }
   double targetArea = getArea(target);
-  os << std::count_if(polys.begin(), polys.end(), AreaLessThan(targetArea)) << '\n';
+  os << std::count_if(g_polys.begin(), g_polys.end(), AreaLessThan(targetArea)) << '\n';
 }
 
 // ============ INTERSECTIONS ============
-void cmdIntersections(const std::vector< Polygon >& polys,
-                      std::istream& is, std::ostream& os)
+void cmdIntersections(std::istream& is, std::ostream& os)
 {
   Polygon target;
   if (!(is >> target))
   {
     throw std::runtime_error("Invalid polygon for INTERSECTIONS");
   }
-  os << std::count_if(polys.begin(), polys.end(), IntersectsWith(target)) << '\n';
+  os << std::count_if(g_polys.begin(), g_polys.end(), IntersectsWith(target)) << '\n';
 }
 
 // ============ MAXSEQ ============
-// Считает максимальное количество идущих подряд фигур, идентичных target.
-// Используем std::adjacent_find / accumulate нельзя напрямую — применяем
-// transform + accumulate: преобразуем вектор в 0/1, затем считаем max run.
-// Без циклов и лямбд — через функтор MaxRunAccumulator.
-
-// Пара (текущая_серия, максимальная_серия)
 struct MaxRunState
 {
   long long current;
   long long maxRun;
 };
 
-// Функтор для std::accumulate: накапливает длину серии совпадений
 struct MaxRunAccumulator
 {
   const Polygon& target;
@@ -226,21 +225,47 @@ struct MaxRunAccumulator
   }
 };
 
-void cmdMaxSeq(const std::vector< Polygon >& polys,
-               std::istream& is, std::ostream& os)
+void cmdMaxSeq(std::istream& is, std::ostream& os)
 {
   Polygon target;
   if (!(is >> target))
   {
-    os << "<INVALID COMMAND>\n";
-    return;
+    throw std::runtime_error("Invalid polygon for MAXSEQ");
   }
 
   MaxRunState result = std::accumulate(
-    polys.begin(), polys.end(),
+    g_polys.begin(), g_polys.end(),
     MaxRunState{ 0, 0 },
     MaxRunAccumulator(target)
   );
 
   os << result.maxRun << '\n';
 }
+
+// ============ ДИСПЕТЧЕР КОМАНД ============
+void doTasks(const std::vector< Polygon >& polys, const std::string& cmdLine)
+{
+  std::istringstream iss(cmdLine);
+  std::string cmd;
+  iss >> cmd;
+
+  std::map< std::string, std::function< void(std::istream&, std::ostream&) > > cmds;
+  cmds["AREA"]          = cmdArea;
+  cmds["MAX"]           = cmdMax;
+  cmds["MIN"]           = cmdMin;
+  cmds["COUNT"]         = cmdCount;
+  cmds["LESSAREA"]      = cmdLessArea;
+  cmds["INTERSECTIONS"] = cmdIntersections;
+  cmds["MAXSEQ"]        = cmdMaxSeq;
+
+  try
+  {
+    setPolygons(polys);
+    cmds.at(cmd)(iss, std::cout);
+  }
+  catch (...)
+  {
+    std::cout << "<INVALID COMMAND>\n";
+  }
+}
+
