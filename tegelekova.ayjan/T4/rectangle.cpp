@@ -28,7 +28,7 @@ void Rectangle::scale(double factor) {
     Point center = getCenter();
     double halfWidth = (topRight.x - bottomLeft.x) * factor / 2;
     double halfHeight = (topRight.y - bottomLeft.y) * factor / 2;
-    
+
     bottomLeft = Point(center.x - halfWidth, center.y - halfHeight);
     topRight = Point(center.x + halfWidth, center.y + halfHeight);
 }
