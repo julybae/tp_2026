@@ -50,12 +50,12 @@ std::istream& operator>>(std::istream& in, PointIO&& dest)
   {
     return in;
   }
-  in >> DelimiterIO{ '(' } >> dest.ref.x >> DelimiterIO{ ';' } >> dest.ref.y >> DelimiterIO{ ')' };
+  in >> DelimiterIO{ '(' } >> dest.ref.x >> DelimiterIO{ ';' }
+     >> dest.ref.y >> DelimiterIO{ ')' };
   return in;
 }
 
 // Функтор для чтения одной точки из потока
-// (используется вместо лямбды в std::generate)
 struct PointReader
 {
   std::istream& in;
@@ -96,6 +96,19 @@ std::istream& operator>>(std::istream& in, Polygon& dest)
     return in;
   }
 
+  // Проверка: после точек не должно быть лишних символов
+  std::string leftover;
+  if (std::getline(in, leftover))
+  {
+    // Удаляем пробелы в конце
+    leftover.erase(leftover.find_last_not_of(" \t\n\r") + 1);
+    if (!leftover.empty())
+    {
+      in.setstate(std::ios::failbit);
+      return in;
+    }
+  }
+
   dest.points = std::move(pts);
   return in;
 }
@@ -118,8 +131,7 @@ std::ostream& operator<<(std::ostream& out, const Polygon& src)
 
 // ============ ГЕОМЕТРИЯ ============
 
-// Функтор для одного слагаемого формулы Гаусса:
-// x_i*y_{i+1} - x_{i+1}*y_i
+// Функтор для одного слагаемого формулы Гаусса: x_i*y_{i+1} - x_{i+1}*y_i
 struct GaussStep
 {
   const std::vector< Point >& pts;
@@ -152,7 +164,6 @@ double getArea(const Polygon& poly)
 
 // ============ SAT (теорема разделяющей оси) ============
 
-// Проецирует точку на ось (nx, ny)
 struct ProjectPoint
 {
   double nx, ny;
@@ -176,8 +187,6 @@ Projection projectPolygon(const Polygon& poly, double nx, double ny)
   return { *mm.first, *mm.second };
 }
 
-// Проверяет является ли ребро (от pts[i] до pts[i+1])
-// разделяющей осью для a и b
 struct IsSeparatingAxis
 {
   const Polygon& a;
@@ -195,24 +204,18 @@ struct IsSeparatingAxis
     std::size_t j = (i + 1) % edgePts.size();
     const Point& q = edgePts[j];
 
-    // Нормаль к ребру p->q: перпендикуляр (dy, -dx)
     double nx = static_cast< double >(q.y - p.y);
     double ny = static_cast< double >(-(q.x - p.x));
 
     Projection pa = projectPolygon(a, nx, ny);
     Projection pb = projectPolygon(b, nx, ny);
 
-    // Нет перекрытия => разделяющая ось найдена
-// => полигоны НЕ пересекаются
     return (pa.maxVal < pb.minVal) || (pb.maxVal < pa.minVal);
   }
 };
 
 bool intersects(const Polygon& a, const Polygon& b)
 {
-  // Если хотя бы по одному ребру найдена
-// разделяющая ось
-// — не пересекаются
   if (std::any_of(a.points.begin(), a.points.end(),
                   IsSeparatingAxis(a, b, a.points)))
   {
