@@ -2,9 +2,9 @@
 #include "Geometry.h"
 #include <iostream>
 #include <numeric>
-#include <string>
 #include <algorithm>
 #include <iomanip>
+#include <limits>
 
 void cmdArea(const std::vector<Polygon>& figures) {
     std::string arg;
@@ -85,7 +85,10 @@ void cmdCount(const std::vector<Polygon>& figures) {
 
 void cmdIntersections(const std::vector<Polygon>& figures) {
     Polygon target;
-    if (!(std::cin >> target)) throw std::runtime_error("");
+    if (!(std::cin >> target)) {
+        throw std::runtime_error("");
+    }
+    // Проверка, не осталось ли мусора в строке команды
     std::cout << std::count_if(figures.begin(), figures.end(), [&](const Polygon& p) {
         return polygonsIntersect(p, target);
     }) << "\n";

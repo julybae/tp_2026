@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
         Polygon poly;
         if (ss >> poly) {
             std::string extra;
-            if (!(ss >> extra)) { // Если после полигона нет лишних данных (кроме пробелов)
+            if (!(ss >> extra)) { // Только если в строке больше нет данных
                 figures.push_back(poly);
             }
         }
@@ -30,15 +30,16 @@ int main(int argc, char* argv[]) {
     while (std::cin >> cmd) {
         try {
             if (cmd == "AREA") cmdArea(figures);
+            else if (cmd == "COUNT") cmdCount(figures);
             else if (cmd == "MAX") cmdMax(figures);
             else if (cmd == "MIN") cmdMin(figures);
-            else if (cmd == "COUNT") cmdCount(figures);
             else if (cmd == "INTERSECTIONS") cmdIntersections(figures);
             else if (cmd == "RMECHO") cmdRmEcho(figures);
             else throw std::runtime_error("");
         } catch (...) {
             std::cout << "<INVALID COMMAND>\n";
             std::cin.clear();
+            // Очищаем поток до конца строки, чтобы не читать мусор как следующую команду
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
