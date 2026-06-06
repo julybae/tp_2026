@@ -54,7 +54,8 @@ std::istream& operator>>(std::istream& in, PointIO&& dest)
   return in;
 }
 
-// Функтор для чтения одной точки из потока (используется вместо лямбды в std::generate)
+// Функтор для чтения одной точки из потока
+// (используется вместо лямбды в std::generate)
 struct PointReader
 {
   std::istream& in;
@@ -117,7 +118,8 @@ std::ostream& operator<<(std::ostream& out, const Polygon& src)
 
 // ============ ГЕОМЕТРИЯ ============
 
-// Функтор для одного слагаемого формулы Гаусса: x_i*y_{i+1} - x_{i+1}*y_i
+// Функтор для одного слагаемого формулы Гаусса:
+// x_i*y_{i+1} - x_{i+1}*y_i
 struct GaussStep
 {
   const std::vector< Point >& pts;
@@ -174,7 +176,8 @@ Projection projectPolygon(const Polygon& poly, double nx, double ny)
   return { *mm.first, *mm.second };
 }
 
-// Проверяет является ли ребро (от pts[i] до pts[i+1]) разделяющей осью для a и b
+// Проверяет является ли ребро (от pts[i] до pts[i+1])
+// разделяющей осью для a и b
 struct IsSeparatingAxis
 {
   const Polygon& a;
@@ -199,14 +202,17 @@ struct IsSeparatingAxis
     Projection pa = projectPolygon(a, nx, ny);
     Projection pb = projectPolygon(b, nx, ny);
 
-    // Нет перекрытия => разделяющая ось найдена => полигоны НЕ пересекаются
+    // Нет перекрытия => разделяющая ось найдена
+// => полигоны НЕ пересекаются
     return (pa.maxVal < pb.minVal) || (pb.maxVal < pa.minVal);
   }
 };
 
 bool intersects(const Polygon& a, const Polygon& b)
 {
-  // Если хотя бы по одному ребру найдена разделяющая ось — не пересекаются
+  // Если хотя бы по одному ребру найдена
+// разделяющая ось
+// — не пересекаются
   if (std::any_of(a.points.begin(), a.points.end(),
                   IsSeparatingAxis(a, b, a.points)))
   {
