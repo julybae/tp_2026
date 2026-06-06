@@ -28,6 +28,7 @@ std::istream& operator>>(std::istream& in, Polygon& polygon) {
 
     if (num_vertices < 3) {
         in.setstate(std::ios::failbit);
+        polygon.points.clear(); // очистка мусора
         return in;
     }
 
@@ -39,6 +40,8 @@ std::istream& operator>>(std::istream& in, Polygon& polygon) {
 
     if (in) {
         polygon.points = std::move(temp_points);
+    } else {
+        polygon.points.clear();
     }
     return in;
 }

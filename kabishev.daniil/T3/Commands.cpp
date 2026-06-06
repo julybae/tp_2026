@@ -113,6 +113,10 @@ void handleCount(const std::vector<Polygon>& polygons) {
     } else {
         try {
             size_t num = std::stoull(arg);
+            if (num < 3) { // <-- test count
+                std::cout << "<INVALID COMMAND>\n";
+                return;
+            }
             count = std::count_if(polygons.begin(), polygons.end(), [num](const Polygon& p) { return hasVertices(p, num); });
         } catch (...) {
             std::cout << "<INVALID COMMAND>\n";
@@ -129,6 +133,13 @@ void handlePerms(const std::vector<Polygon>& polygons) {
         std::cin.clear();
         std::string dummy;
         std::getline(std::cin, dummy);
+        return;
+    }
+
+    std::string extra;
+    std::getline(std::cin, extra);
+    if (!extra.empty() && std::any_of(extra.begin(), extra.end(), [](char c) { return c == '('; })) {
+        std::cout << "<INVALID COMMAND>\n";
         return;
     }
 
@@ -153,6 +164,14 @@ void handleSame(const std::vector<Polygon>& polygons) {
         std::cin.clear();
         std::string dummy;
         std::getline(std::cin, dummy);
+        return;
+    }
+
+    // test (лишние точки в строке)
+    std::string extra;
+    std::getline(std::cin, extra);
+    if (!extra.empty() && std::any_of(extra.begin(), extra.end(), [](char c) { return c == '(' || c == ';'; })) {
+        std::cout << "<INVALID COMMAND>\n";
         return;
     }
 
