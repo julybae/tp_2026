@@ -268,7 +268,9 @@ void doTasks(const std::vector< Polygon >& polys)
     catch (...)
     {
       std::cout << "<INVALID COMMAND>\n";
+      std::cin.clear();
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
   }
 }
+
