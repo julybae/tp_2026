@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <map>
 #include <functional>
+#include <limits>
 
 // ============ ГЛОБАЛЬНАЯ КОЛЛЕКЦИЯ ПОЛИГОНОВ ============
 static std::vector< Polygon > g_polys;
@@ -243,11 +244,10 @@ void cmdMaxSeq(std::istream& is, std::ostream& os)
 }
 
 // ============ ДИСПЕТЧЕР КОМАНД ============
-void doTasks(const std::vector< Polygon >& polys, const std::string& cmdLine)
+// Читает команды из is до EOF, выполняет через map
+void doTasks(const std::vector< Polygon >& polys)
 {
-  std::istringstream iss(cmdLine);
-  std::string cmd;
-  iss >> cmd;
+  setPolygons(polys);
 
   std::map< std::string, std::function< void(std::istream&, std::ostream&) > > cmds;
   cmds["AREA"]          = cmdArea;
@@ -258,14 +258,17 @@ void doTasks(const std::vector< Polygon >& polys, const std::string& cmdLine)
   cmds["INTERSECTIONS"] = cmdIntersections;
   cmds["MAXSEQ"]        = cmdMaxSeq;
 
-  try
+  std::string command;
+  while (!(std::cin >> command).eof())
   {
-    setPolygons(polys);
-    cmds.at(cmd)(iss, std::cout);
-  }
-  catch (...)
-  {
-    std::cout << "<INVALID COMMAND>\n";
+    try
+    {
+      cmds.at(command)(std::cin, std::cout);
+    }
+    catch (...)
+    {
+      std::cout << "<INVALID COMMAND>\n";
+      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+    }
   }
 }
-

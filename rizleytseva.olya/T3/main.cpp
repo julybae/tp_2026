@@ -1,62 +1,47 @@
 #include "polygon.h"
 #include "commands.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
-#include <string>
-#include <sstream>
+#include <algorithm>
+#include <iterator>
+#include <limits>
 
-int main()
+int main(int argc, char* argv[])
 {
-  std::vector< Polygon > polys;
-  std::string line;
-
-  while (std::getline(std::cin, line))
+  // Тест 23/29: ровно один аргумент — имя файла
+  if (argc != 2)
   {
-    if (line.empty())
-    {
-      continue;
-    }
-
-    std::istringstream ss(line);
-    std::string firstToken;
-    if (!(ss >> firstToken))
-    {
-      continue;
-    }
-
-    // Проверяем, является ли первое слово командой
-    static const std::string cmdsList[] = {
-      "AREA", "MAX", "MIN", "COUNT", "LESSAREA", "INTERSECTIONS", "MAXSEQ"
-    };
-    bool isCmd = false;
-    for (const auto& c : cmdsList)
-    {
-      if (firstToken == c)
-      {
-        isCmd = true;
-        break;
-      }
-    }
-
-    if (isCmd)
-    {
-      doTasks(polys, line);
-    }
-    else
-    {
-      // Пробуем прочитать полигон
-      Polygon p;
-      std::istringstream polyStream(line);
-      if (polyStream >> p)
-      {
-        std::string extra;
-        if (!(polyStream >> extra))
-        {
-          polys.push_back(std::move(p));
-        }
-      }
-    }
+    std::cerr << "Error: expected exactly one argument: filename\n";
+    return 1;
   }
+
+  std::ifstream file(argv[1]);
+  if (!file.is_open())
+  {
+    std::cerr << "Error: cannot open file '" << argv[1] << "'\n";
+    return 1;
+  }
+
+  // Шаг 1: читаем полигоны из файла — отдельным действием
+  std::vector< Polygon > polys;
+  while (!file.eof())
+  {
+    if (!file)
+    {
+      file.clear();
+      file.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+      continue;
+    }
+    std::copy(
+      std::istream_iterator< Polygon >(file),
+      std::istream_iterator< Polygon >(),
+      std::back_inserter(polys)
+    );
+  }
+
+  // Шаг 2: обрабатываем команды из stdin
+  doTasks(polys);
 
   return 0;
 }

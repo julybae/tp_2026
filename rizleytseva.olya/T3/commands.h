@@ -16,7 +16,9 @@ void cmdIntersections(std::istream& is, std::ostream& os);
 void cmdMaxSeq(std::istream& is, std::ostream& os);
 
 void setPolygons(const std::vector< Polygon >& polys);
-void doTasks(const std::vector< Polygon >& polys, const std::string& cmdLine);
+
+// doTasks читает команды из std::cin до EOF
+void doTasks(const std::vector< Polygon >& polys);
 
 #endif // COMMANDS_H
 
