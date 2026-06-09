@@ -175,10 +175,19 @@ void cmdCount(std::istream& is, std::ostream& os)
 // ============ LESSAREA ============
 void cmdLessArea(std::istream& is, std::ostream& os)
 {
-  Polygon target;
-  if (!(is >> target))
+  std::string line;
+  if (!std::getline(is, line))
   {
-    throw std::runtime_error("Invalid polygon for LESSAREA");
+    os << "<INVALID COMMAND>\n";
+    return;
+  }
+  std::istringstream ss(line);
+  Polygon target;
+  std::string extra;
+  if (!(ss >> target) || ss.fail() || (ss >> extra))
+  {
+    os << "<INVALID COMMAND>\n";
+    return;
   }
   double targetArea = getArea(target);
   os << std::count_if(g_polys.begin(), g_polys.end(), AreaLessThan(targetArea)) << '\n';
@@ -187,10 +196,19 @@ void cmdLessArea(std::istream& is, std::ostream& os)
 // ============ INTERSECTIONS ============
 void cmdIntersections(std::istream& is, std::ostream& os)
 {
-  Polygon target;
-  if (!(is >> target))
+  std::string line;
+  if (!std::getline(is, line))
   {
-    throw std::runtime_error("Invalid polygon for INTERSECTIONS");
+    os << "<INVALID COMMAND>\n";
+    return;
+  }
+  std::istringstream ss(line);
+  Polygon target;
+  std::string extra;
+  if (!(ss >> target) || ss.fail() || (ss >> extra))
+  {
+    os << "<INVALID COMMAND>\n";
+    return;
   }
   os << std::count_if(g_polys.begin(), g_polys.end(), IntersectsWith(target)) << '\n';
 }
@@ -228,10 +246,19 @@ struct MaxRunAccumulator
 
 void cmdMaxSeq(std::istream& is, std::ostream& os)
 {
-  Polygon target;
-  if (!(is >> target))
+  std::string line;
+  if (!std::getline(is, line))
   {
-    throw std::runtime_error("Invalid polygon for MAXSEQ");
+    os << "<INVALID COMMAND>\n";
+    return;
+  }
+  std::istringstream ss(line);
+  Polygon target;
+  std::string extra;
+  if (!(ss >> target) || ss.fail() || (ss >> extra))
+  {
+    os << "<INVALID COMMAND>\n";
+    return;
   }
 
   MaxRunState result = std::accumulate(

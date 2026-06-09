@@ -90,23 +90,9 @@ std::istream& operator>>(std::istream& in, Polygon& dest)
   std::vector< Point > pts(n);
   std::generate(pts.begin(), pts.end(), PointReader(in));
 
-  if (!in)
+  if (in.fail())
   {
-    in.setstate(std::ios::failbit);
     return in;
-  }
-
-  // Проверка: после точек не должно быть лишних символов
-  std::string leftover;
-  if (std::getline(in, leftover))
-  {
-    // Удаляем пробелы в конце
-    leftover.erase(leftover.find_last_not_of(" \t\n\r") + 1);
-    if (!leftover.empty())
-    {
-      in.setstate(std::ios::failbit);
-      return in;
-    }
   }
 
   dest.points = std::move(pts);
